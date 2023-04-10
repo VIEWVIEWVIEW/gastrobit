@@ -150,7 +150,7 @@ const Navbar = () => {
 }
 
 const LoggedInNavbar = ({ session }: { session: Session }) => {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient<Database>()
 
   const [restaurants, setRestaurants] = useState<Restaurants[]>([])
 
