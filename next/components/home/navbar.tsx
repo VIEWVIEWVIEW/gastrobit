@@ -158,7 +158,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
     const fetchRestaurants = async () => {
       const { data: restaurants, error } = await supabase
         .from('restaurants')
-        .select('*')
+        .select()
         .order('created_at', { ascending: true })
 
       if (error) console.log('error', error)

@@ -5,13 +5,15 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { useState } from 'react'
 import { Session } from '@supabase/auth-helpers-react'
 
+import type { Database } from '@/types/supabase'
+
 export default function App({
   Component,
   pageProps,
 }: AppProps<{
   initialSession: Session
 }>) {
-  const [supabase] = useState(() => createBrowserSupabaseClient())
+  const [supabase] = useState(() => createBrowserSupabaseClient<Database>())
 
   return (
     <SessionContextProvider

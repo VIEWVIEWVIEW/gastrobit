@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps = async function ({ req, res
   }
 }
 
-function Page(props) {
+function Page(props: any) {
   const router = useRouter()
   return <div>User site {router.route} {JSON.stringify(props)} </div>
 }
