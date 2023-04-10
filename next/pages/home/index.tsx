@@ -1,8 +1,13 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import { Auth } from '@supabase/auth-ui-react'
+import { Navbar } from '@/components/home/navbar'
 
 const inter = Inter({ subsets: ['latin'] })
+
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import MainLayout from '@/Layouts/MainLayout'
 
 export default function Home() {
   return (
@@ -13,7 +18,76 @@ export default function Home() {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-        <h1 className='text-3xl font-bold underline'>Hello world!</h1>
+
+      <MainLayout>
+        {/* Make a div which uses the rest of the screen height */}
+        <div className='border border-yellow-400'>a</div>
+      </MainLayout>
     </>
+  )
+}
+
+function Login() {
+  const session = useSession()
+  const supabase = useSupabaseClient()
+  return (
+    <>
+      <h1 className='text-3xl font-bold underline'>Hello world!</h1>
+      <p className='bg-blue-200'>Account page will go here.</p>
+      <div className='container'>
+        {!session ? (
+          <Auth
+            supabaseClient={supabase}
+            appearance={{
+              extend: false,
+              className: {
+                button: ' bg-green-200 p-5',
+                container: 'bg-sepia-800 p-5',
+                anchor: 'bg-red-100',
+                divider: '',
+                label: 'text-underline',
+                input: '',
+                loader: 'loader',
+                message: 'bg-blue-200',
+              },
+            }}
+          />
+        ) : (
+          <p className='bg-blue-200'>Account page will go here.</p>
+        )}
+      </div>
+    </>
+  )
+}
+function OldPage() {
+  return (
+    <div className='relative z-0 w-full'>
+      <div className='flex flex-col flex-wrap w-full md:flex-row'>
+        <div className='flex items-center justify-center w-full bg-black md:w-1/2'>
+          <div className='flex flex-col justify-start w-3/4 px-4 py-20 md:px-20'>
+            <div className='mb-4 space-x-4'>
+              <span className='mb-1.5 inline-block'>----</span>
+              <p className='inline-block text-base text-white uppercase font-dmsans'>
+                Restaurant
+              </p>
+            </div>
+            <p className='mt-4 text-5xl text-white uppercase md:text-7xl font-baskerville'>
+              Top <br />
+              Service <br />
+              <em>Cuisine</em>
+            </p>
+            <button className='w-40 p-2 my-4 text-white uppercase md:my-12 bg-pink'>
+              See Menu
+            </button>
+          </div>
+        </div>
+        <div className='w-full bg-yellow-200 md:w-1/2'>
+          <img
+            className='object-cover w-full h-full'
+            src='https://restaurant-landing-page-six.vercel.app/images/section1-background.png'
+            alt='restaurant'></img>
+        </div>
+      </div>
+    </div>
   )
 }
