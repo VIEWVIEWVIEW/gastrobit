@@ -1,0 +1,2 @@
+# exclude everything in supabase directory
+next/supabase/functions/hello-world/index.ts
