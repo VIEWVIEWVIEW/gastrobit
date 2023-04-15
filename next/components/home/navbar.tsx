@@ -1,4 +1,4 @@
-import { Popover, Transition } from '@headlessui/react'
+import { Menu, Popover, Transition } from '@headlessui/react'
 import { Bars4Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Fragment, useState } from 'react'
 import Image from 'next/image'
@@ -149,6 +149,38 @@ const Navbar = () => {
   )
 }
 
+const Restaurants = ({ restaurants }: { restaurants: Restaurants[] }) => {
+  // if we have more than 3 restaurants, we show them in a dropdown menu
+  if (restaurants.length > 1)
+    return (
+      <>
+        <Menu>
+          <Menu.Button>More</Menu.Button>
+          <Menu.Items>
+            {restaurants.map((restaurant, index) => (
+              <Menu.Item key={restaurant.id}>
+                {({ active }) => (
+                  <a
+                    className={`${active && 'bg-blue-500'}`}
+                    href='/account-settings'>
+                    {restaurant.name}
+                  </a>
+                )}
+              </Menu.Item>
+            ))}
+          </Menu.Items>
+        </Menu>
+      </>
+    )
+  return (
+    <>
+      {restaurants.map((restaurant, index) => (
+        <div key={index}>{restaurant.name}</div>
+      ))}
+    </>
+  )
+}
+
 const LoggedInNavbar = ({ session }: { session: Session }) => {
   const supabase = useSupabaseClient<Database>()
 
@@ -170,7 +202,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
 
   return (
     <>
-    {JSON.stringify(restaurants)}
+      {JSON.stringify(restaurants)}
       aa
       <Popover as='header' className='relative'>
         <div className='py-6 bg-taubmanspurple-500'>
@@ -205,6 +237,8 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
                     {item.name}
                   </a>
                 ))}
+
+                <Restaurants restaurants={restaurants} />
               </div>
             </div>
             <div className='hidden md:flex md:items-center md:space-x-6'>
