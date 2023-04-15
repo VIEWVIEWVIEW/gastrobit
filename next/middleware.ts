@@ -48,7 +48,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // rewrite root application to `/home` folder
-  if (hostname === 'localhost:3000' || hostname === 'gastrobit.de') {
+  if (hostname === 'localhost:3000' || hostname === 'gastrobit.de' || hostname === 'www.gastrobit.de') {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
 
