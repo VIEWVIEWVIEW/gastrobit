@@ -48,6 +48,7 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
     },
   }
 }
+
 function Restaurant(props: Props) {
   const router = useRouter()
   const { id } = router.query
@@ -78,8 +79,8 @@ function Restaurant(props: Props) {
   if (!restaurant)
     return (
       <MainLayout>
-        <div className='container mx-auto'>
-          <div className='flex flex-col justify-end px-10 m-2'>
+        <div className='container px-96 mx-aut'>
+          <div className='flex flex-col justify-end px-10 m-20'>
             <h1 className='text-3xl font-bold text-center'>
               Bisher hast du kein Restaurant erstellt.
             </h1>

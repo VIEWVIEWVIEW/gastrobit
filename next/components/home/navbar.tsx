@@ -178,7 +178,7 @@ const Restaurants = ({
                         className={`-m-3 p-3 ${
                           active && ' block bg-taubmanspurple-600 '
                         }`}
-                        href={`/restaurant/${restaurant.id}`}>
+                        href={`/restaurant/${restaurant.id}/settings`}>
                         <p className='text-sm font-medium text-white'>
                           {restaurant.name}
                         </p>
@@ -199,7 +199,7 @@ const Restaurants = ({
       {restaurants.map((restaurant, index) => (
         <a
           key={index}
-          href={`/restaurant/${restaurant.id}`}
+          href={`/restaurant/${restaurant.id}/settings`}
           className='block px-3 py-2 text-base font-medium text-gray-50 hover:bg-taubmanspurple-600'>
           {restaurant.name}
         </a>
@@ -245,7 +245,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
             aria-label='Global'>
             <div className='flex items-center flex-1'>
               <div className='flex items-center justify-between w-full md:w-auto'>
-                <a href='#'>
+                <Link href='/'>
                   <span className='sr-only'>Gastrobit</span>
                   <Image
                     className='w-auto h-8 sm:h-10 hover'
@@ -254,9 +254,9 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
                     width={100}
                     height={100}
                   />
-                </a>
+                </Link>
                 <div className='flex items-center -mr-2 md:hidden'>
-                  <Popover.Button className='inline-flex items-center justify-center p-2 text-gray-400 bg-taubmanspurple-700 hover:bg-taubmanspurple-800 focus:outline-none focus:ring-2 focus-ring-inset focus:ring-white'>
+                  <Popover.Button className='inline-flex items-center justify-center p-2 mx-4 text-gray-400 bg-taubmanspurple-700 hover:bg-taubmanspurple-800 focus:outline-none focus:ring-2 focus-ring-inset focus:ring-white'>
                     <span className='sr-only'>Open main menu</span>
                     <Bars4Icon className='w-6 h-6' aria-hidden='true' />
                   </Popover.Button>
@@ -275,7 +275,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
                 <Restaurants restaurants={restaurants} />
               </div>
             </div>
-            <div className='flex flex-row space-x-6 md:items-center'>
+            <div className='flex-row space-x-6 md:flex md:items-center sm:hidden'>
               <a
                 className='text-base font-medium text-white hover:text-gray-300'
                 href='/profile'>
@@ -301,7 +301,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
           <Popover.Panel
             focus
             className='absolute inset-x-0 top-0 p-2 transition origin-top transform md:hidden'>
-            <div className='overflow-hidden rounded-lg shadow-md bg-taubmanspurple-700 ring-1 ring-black ring-opacity-5'>
+            <div className='overflow-hidden shadow-md bg-taubmanspurple-700 ring-1 ring-black ring-opacity-5'>
               <div className='flex items-center justify-between px-5 pt-4'>
                 <div>
                   <Image
@@ -313,7 +313,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
                   />
                 </div>
                 <div className='-mr-2'>
-                  <Popover.Button className='inline-flex items-center justify-center p-2 text-white rounded-md bg-taubmanspurple-600 hover:bg-taubmanspurple-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-600'>
+                  <Popover.Button className='inline-flex items-center justify-center p-2 text-white border-0 border-none focus:outline-white bg-taubmanspurple-600 hover:bg-taubmanspurple-500 focus:outline-none focus:ring-2 focus:ring-inset ring-0'>
                     <span className='sr-only'>Close menu</span>
                     <XMarkIcon className='w-6 h-6' aria-hidden='true' />
                   </Popover.Button>
