@@ -1,5 +1,7 @@
 import { getToken } from 'next-auth/jwt'
 import { NextRequest, NextResponse } from 'next/server'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from './types/supabase'
 
 export const config = {
   matcher: [
@@ -32,26 +34,41 @@ export default async function middleware(req: NextRequest) {
       ? hostname.replace(`.gastrobit.de`, '')
       : hostname.replace(`.localhost:3000`, '')
 
-  // rewrites for app pages
-  if (currentHost == 'app') {
-    if (
-      url.pathname === '/login' &&
-      (req.cookies.get('next-auth.session-token') ||
-        req.cookies.get('__Secure-next-auth.session-token'))
-    ) {
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
-
-    url.pathname = `/app${url.pathname}`
-    return NextResponse.rewrite(url)
-  }
-
   // rewrite root application to `/home` folder
-  if (hostname === 'localhost:3000' || hostname === 'gastrobit.de' || hostname === 'www.gastrobit.de') {
+  if (
+    hostname === 'localhost:3000' ||
+    hostname === 'www.localhost:3000' ||
+    hostname === 'gastrobit.de' ||
+    hostname === 'www.gastrobit.de'
+  ) {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
 
+  // else we are on a user page
+  // therefore we need the restaurant id from db
+  const supabase = new SupabaseClient<Database>(
+    'https://cdnbppscedvrlglygkyn.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbmJwcHNjZWR2cmxnbHlna3luIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDU2NjkwMiwiZXhwIjoxOTk2MTQyOTAyfQ.yFo5jlzaEu31TjrGH_sGJiSXMQk7u3mxSshcCtsRI3U',
+  )
+
+  console.log('currentHost', hostname)
+
+  // get the restaurant id of our current host
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('id')
+    .overlaps('domains', ['hostname'])
+    .single()
+
+  const restaurantId = data?.id
+
+  // if no restaurant id is found, the restaurant does not exist. We redirect to home
+  if (!restaurantId) {
+    return NextResponse.rewrite(new URL(`/404.tsx`, req.url))
+  }
+
   // rewrite everything else to `/_sites/[site] dynamic route
-  return NextResponse.rewrite(new URL(`/_sites/${currentHost}${path}`, req.url))
+  return NextResponse.rewrite(
+    new URL(`/_sites/${restaurantId}${path}`, req.url),
+  )
 }

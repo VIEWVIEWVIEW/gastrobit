@@ -33,7 +33,7 @@ function Page(props: any) {
   const router = useRouter()
   return (
     <div>
-      User site {router.route} {JSON.stringify(props)}{' '}
+      Checkout {router.route} {JSON.stringify(props)}{' '}
     </div>
   )
 }

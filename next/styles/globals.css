@@ -4,7 +4,7 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium text-white bg-taubmanspurple-600 hover:bg-taubmanspurple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+    @apply flex flex-row justify-center px-4 py-2 border border-transparent text-base font-medium text-white focus:ring-2 focus:ring-taubmanspurple-100 bg-taubmanspurple-600 hover:bg-taubmanspurple-700 focus:outline-none ;
   }
 
   .input {

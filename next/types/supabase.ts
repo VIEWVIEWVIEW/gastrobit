@@ -16,7 +16,7 @@ export interface Database {
           domains: string[] | null
           id: number
           karte: Json | null
-          name: string | null
+          name: string
           owner_id: string
         }
         Insert: {
@@ -25,7 +25,7 @@ export interface Database {
           domains?: string[] | null
           id?: number
           karte?: Json | null
-          name?: string | null
+          name: string
           owner_id: string
         }
         Update: {
@@ -34,7 +34,7 @@ export interface Database {
           domains?: string[] | null
           id?: number
           karte?: Json | null
-          name?: string | null
+          name?: string
           owner_id?: string
         }
       }
