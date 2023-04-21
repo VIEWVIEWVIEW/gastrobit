@@ -34,6 +34,8 @@ export default async function middleware(req: NextRequest) {
       ? hostname.replace(`.gastrobit.de`, '')
       : hostname.replace(`.localhost:3000`, '')
 
+  console.log("hostname", hostname)
+
   // rewrite root application to `/home` folder
   if (
     hostname === 'localhost:3000' ||
@@ -57,7 +59,7 @@ export default async function middleware(req: NextRequest) {
   const { data, error } = await supabase
     .from('restaurants')
     .select('id')
-    .overlaps('domains', ['hostname'])
+    .overlaps('domains', [hostname])
     .single()
 
   const restaurantId = data?.id

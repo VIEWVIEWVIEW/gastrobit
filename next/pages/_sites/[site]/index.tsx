@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 
-import type { ParsedUrlQuery } from "querystring"
+import type { ParsedUrlQuery } from 'querystring'
+import RestaurantLayout from '@/Layouts/RestaurantLayout'
 
 interface PathProps extends ParsedUrlQuery {
   site: string
@@ -30,9 +31,11 @@ export const getServerSideProps: GetServerSideProps = async function ({
 function Page(props: any) {
   const router = useRouter()
   return (
-    <div>
-      Index {router.route} {JSON.stringify(props)}{' '}
-    </div>
+    <RestaurantLayout>
+      <div>
+        Index {router.route} {JSON.stringify(props)}{' '}
+      </div>
+    </RestaurantLayout>
   )
 }
 

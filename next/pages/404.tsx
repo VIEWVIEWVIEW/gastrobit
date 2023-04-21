@@ -1,8 +1,8 @@
 import React from 'react'
 
-function FourOhFour() {
+function FourOhFour(props: any) {
   return (
-    <div>FourOhFour</div>
+    <div>FourOhFour {JSON.stringify(props)}</div>
   )
 }
 
