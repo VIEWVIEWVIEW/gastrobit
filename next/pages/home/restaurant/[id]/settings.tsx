@@ -9,6 +9,7 @@ import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import Link from 'next/link'
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row']
 
@@ -61,7 +62,7 @@ function Restaurant(props: Props) {
   const [subdomain, setSubdomain] = useState('')
   const getGastrobitSubdomain = useCallback(() => {
     if (!restaurant || !restaurant.domains) return
-    
+
     const subdomain = restaurant?.domains.find(domain =>
       domain.includes('gastrobit.de'),
     )
@@ -101,10 +102,14 @@ function Restaurant(props: Props) {
           </h1>
 
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
-            <div className='space-y-8 divide-y divide-gray-200 sm:space-y-5'>
+            <div className='space-y-8 divide-y sm:space-y-5'>
+
+
+              {/** Settings */}
+
               <div>
                 <div>
-                  <h3 className='text-lg font-medium leading-6 text-gray-900'>
+                  <h3 className='mt-10 text-lg font-medium leading-6 text-gray-900'>
                     Einstellungen
                   </h3>
                   <p className='max-w-2xl mt-1 text-sm text-gray-500'>
@@ -136,6 +141,9 @@ function Restaurant(props: Props) {
                         </span>
                       </div>
                     </div>
+                    <button className='col-start-2 mt-10 btn-primary'>
+                      Speichern
+                    </button>
                   </div>
                 </div>
               </div>
@@ -146,5 +154,8 @@ function Restaurant(props: Props) {
     </MainLayout>
   )
 }
+
+
+
 
 export default Restaurant

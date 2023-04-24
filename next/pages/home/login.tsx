@@ -14,16 +14,17 @@ import { useRouter } from 'next/router'
 function Login() {
   const session = useSession()
   const supabase = useSupabaseClient()
+  const router = useRouter()
+
+  if (session) {
+    router.push('/')
+  }
 
   return (
     <>
       <MainLayout>
         <div className='container mx-auto mt-5 mb-10'>
-          {!session ? (
-            <Supabase supabase={supabase} />
-          ) : (
-            <p className='bg-blue-200 '>Account page will go here.</p>
-          )}
+          <Supabase supabase={supabase} />
         </div>
       </MainLayout>
     </>

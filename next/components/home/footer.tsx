@@ -211,4 +211,18 @@ const Footer = () => {
   )
 }
 
-export { Footer }
+const Footer2 = () => {
+  return (
+    <>
+      <footer className='h-20 bg-gray-50' aria-labelledby='footer-heading'>
+        <h2 className='flex flex-row items-center justify-center h-full text-gray-600 space-x-7'>
+          <p>Gastrobit 2023</p>
+
+          <a className="hover:text-gray-500" href="/imprint">Impressum</a>
+        </h2>
+      </footer>
+    </>
+  )
+}
+
+export { Footer2 as Footer }

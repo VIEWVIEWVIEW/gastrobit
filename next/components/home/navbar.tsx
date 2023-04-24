@@ -1,5 +1,9 @@
 import { Menu, Popover, Transition } from '@headlessui/react'
-import { Bars4Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  Bars4Icon,
+  UserGroupIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { Fragment, useState } from 'react'
 import Image from 'next/image'
 
@@ -12,12 +16,14 @@ import { Database } from '@/types/supabase'
 import { ChevronDownIcon } from '@heroicons/react/24/solid'
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 type Restaurants = Database['public']['Tables']['restaurants']['Row']
 
-const navigation = [{ name: 'Startseite', href: '/' }]
+
 
 const Navbar = () => {
+  const navigation = [{ name: 'Startseite', href: '/' }]
   const session = useSession()
   const supabase = useSupabaseClient()
 
@@ -212,7 +218,9 @@ const Restaurants = ({
  * This is the navbar that is shown when the user is logged in
  */
 const LoggedInNavbar = ({ session }: { session: Session }) => {
+  const navigation = [{ name: 'Dashboard', href: '/' }]
   const supabase = useSupabaseClient<Database>()
+  const router = useRouter()
 
   const [restaurants, setRestaurants] = useState<Restaurants[]>([])
 
@@ -230,14 +238,13 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
     fetchRestaurants()
   }, [supabase])
 
-  const logout = () => {
-    supabase.auth.signOut()
+  const logout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
   }
 
   return (
     <>
-      {JSON.stringify(restaurants)}
-      aa
       <Popover as='header' className='relative'>
         <div className='py-6 bg-taubmanspurple-500'>
           <nav
@@ -283,7 +290,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
               </a>
               <a
                 onClick={logout}
-                className='text-base font-medium text-white hover:text-gray-300'>
+                className='text-base font-medium text-white cursor-pointer hover:text-gray-300'>
                 Logout
               </a>
             </div>

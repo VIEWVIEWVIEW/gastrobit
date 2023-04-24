@@ -15,7 +15,7 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
 
   return {
     props: {
-        params: ctx.params,
+      params: ctx.params,
     },
   }
 }
@@ -23,13 +23,17 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
 function RestaurantLayout({
   children,
   className,
+  theme,
 }: {
   children: React.ReactNode
   className?: string
+  theme?: string
 }) {
   return (
     <>
-      <div className='flex flex-col justify-between min-h-screen bg-sepia-300'>
+      <div
+        className='flex flex-col justify-between min-h-screen '
+        data-theme={theme}>
         <div>{children}</div>
       </div>
     </>
