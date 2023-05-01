@@ -1,5 +1,5 @@
 import MainLayout from '@/Layouts/MainLayout'
-import React, { DragEventHandler, useCallback, useState } from 'react'
+import React, { Dispatch, DragEventHandler, useCallback, useState } from 'react'
 import { z } from 'zod'
 type Props = {
   restaurant: Restaurant
@@ -9,64 +9,9 @@ type Props = {
 }
 type Restaurant = Database['public']['Tables']['restaurants']['Row']
 
-/**
- * Erstelle ein Zod Schema für eine Restaurantkarte.
- * Die Karte soll ein Array von Objekten sein, der wie folgt aussieht:
- * **/
 
-const extra = z.object({
-  name: z.string(),
-  preis: z.number(),
-})
 
-const extras = z.array(
-  z.object({
-    name: z.string({
-      description: "Der Name des der Extrakategorie, z.B. 'Ihr Salatdressing'",
-    }),
-    typ: z.enum(['oneOf', 'manyOf'], {
-      description:
-        "Der Typ der Extrakategorie, z.B. 'oneOf', wenn nur eine Option ausgewählt werden kann",
-    }),
-    items: z.array(extra, {
-      description: 'Die verfügbarer Extras für ein Gericht',
-    }),
-  }),
-)
 
-const preis = z.object({
-  name: z.string({
-    description:
-      "Der Name des Preises, z.B. 'klein (18cm)', 'mittel', 'groß (30cm)'",
-  }),
-  preis: z.number({
-    description:
-      'Der Preis in Euro des Gerichts für die angegebene Größe, z.B. 5.5',
-  }),
-})
-
-const gericht = z.object({
-  id: z.string().or(z.number()),
-  ueberschrift: z.string(),
-  unterschrift: z.string(),
-  preise: z.array(preis, {
-    description: 'Die verfügbaren Größen und Preise für das Gericht',
-  }),
-  extras: extras.optional(),
-})
-
-const category = z.object({
-  headerUrl: z.string().optional(),
-  id: z.string().or(z.number()),
-  name: z.string(),
-  gerichte: z.array(gericht),
-})
-
-export type Category = z.infer<typeof category>
-
-const karte = z.array(category)
-
-export type Gericht = z.infer<typeof gericht>
 const testpidser: Gericht = {
   id: 'lol',
   ueberschrift: 'Pizza Prosciutto ',
@@ -83,7 +28,7 @@ const testpidser: Gericht = {
   ],
 }
 
-export type Karte = z.infer<typeof karte>
+
 const testkarte: Karte = [
   {
     id: 'pizza',
@@ -168,6 +113,8 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { GetServerSideProps } from 'next'
 import { Database } from '@/types/supabase'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import GerichtModal from '@/components/home/gerichtModal'
+import { category, Gericht, Categories, Category, categories, Karte } from '../../../../types/schema'
 
 const DragIcon = (props: any) => (
   <svg
@@ -186,23 +133,35 @@ const DragIcon = (props: any) => (
   </svg>
 )
 
-const PencilIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    fill='none'
-    viewBox='0 0 24 24'
-    strokeWidth={1.5}
-    stroke='currentColor'
-    className='w-6 h-6'>
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10'
-    />
-  </svg>
-)
+const PencilIcon = () => {
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      fill='none'
+      viewBox='0 0 24 24'
+      strokeWidth={1.5}
+      stroke='currentColor'
+      className='w-6 h-6'>
+      <path
+        strokeLinecap='round'
+        strokeLinejoin='round'
+        d='M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10'
+      />
+    </svg>
+  )
+}
 
-const SortableItem = (props: any) => {
+const Item = ({
+  item,
+  id,
+  categories,
+  setCategories,
+}: {
+  item: Gericht
+  id: any
+  categories: Categories
+  setCategories: Dispatch<Categories>
+}) => {
   const {
     attributes,
     listeners,
@@ -210,13 +169,19 @@ const SortableItem = (props: any) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: props.id })
+  } = useSortable({ id })
 
   const style = {
     transform: transform
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
       : undefined,
     transition,
+  }
+
+  const [open, setOpen] = useState(false)
+
+  const openModal = () => {
+    if (!open) setOpen(true)
   }
 
   return (
@@ -226,21 +191,22 @@ const SortableItem = (props: any) => {
       {...attributes}
       className='w-full  py-0.5 bg-slate-50'>
       <div className='flex flex-row justify-between w-full'>
-        <div className='px-4'>{props.children}</div>
+        <div className='px-4'>
+          <div key={item.id} className='flex flex-col my-5'>
+            <h3 className='text-xl'>{item.ueberschrift}</h3>
+            <p>{item.unterschrift}</p>
+          </div>
+        </div>
+
         <div className='flex flex-row'>
-          <PencilIcon />
+          <div onClick={openModal}>
+            <PencilIcon />
+            <GerichtModal open={open} onClose={setOpen} />
+          </div>
+
           <DragIcon {...listeners} />
         </div>
       </div>
-    </div>
-  )
-}
-
-const Item = ({ item }: { item: Gericht }) => {
-  return (
-    <div key={item.id} className='flex flex-col my-5'>
-      <h3 className='text-xl'>{item.ueberschrift}</h3>
-      <p>{item.unterschrift}</p>
     </div>
   )
 }
@@ -310,9 +276,13 @@ const SortableCategory = ({
               strategy={verticalListSortingStrategy}>
               <div className='w-full space-y-2'>
                 {category.gerichte.map((item, index) => (
-                  <SortableItem key={item.id} id={item.id}>
-                    <Item item={item} />
-                  </SortableItem>
+                  <Item
+                    key={item.id}
+                    id={item.id}
+                    item={item}
+                    categories={categories}
+                    setCategories={setCategories}
+                  />
                 ))}
               </div>
             </SortableContext>
@@ -328,7 +298,7 @@ const SortableCategory = ({
 }
 
 const Menu = (props: Props) => {
-  const [categories, setCategories] = useState<Karte>(
+  const [categoriesState, setCategoriesState] = useState<Karte>(
     // @ts-expect-error Fuck typescript
     props.restaurant.karte ?? testkarte,
   )
@@ -341,45 +311,66 @@ const Menu = (props: Props) => {
       preise: [{ name: 'klein (18cm)', preis: 7.5 }],
     }
 
-    const newCategories = [...categories]
+    const newCategories = [...categoriesState]
     // find pizza category
     const pizzaCategory = newCategories.find(c => c.id === 'pizza')
     if (pizzaCategory) {
       pizzaCategory.gerichte.push(newPizza)
     }
-    setCategories(newCategories)
+    setCategoriesState(newCategories)
     console.log(newCategories)
   }
 
   const supabase = useSupabaseClient<Database>()
 
   const saveToSupabase = async () => {
-    const {data, error} = await supabase.from('restaurants').update({
-      karte: categories,
-    }).eq('id', props.params.id)
+    // validate "categories" with schema "category"
+    categories.parse(categoriesState)
+    console.debug('parsed successfully')
 
-    console.log(data)
+    const { data, error } = await supabase
+      .from('restaurants')
+      .update({
+        karte: categoriesState,
+      })
+      .eq('id', props.params.id)
+
+    console.log(data, error)
   }
+
+  const a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
 
   return (
     <MainLayout>
       <div className='container max-w-6xl mx-auto mb-32 '>
         <div className='grid grid-cols-3 space-x-5'>
+          {/** Left column */}
           <div className='flex flex-col items-center col-span-2'>
-            <h1 className='mt-12 mb-8 text-5xl'>Speisekarte</h1>
+            <h1 className='mt-12 mb-8 text-3xl'>Speisekarte</h1>
             <div className='w-full p-2 space-y-36 bg-sepia-400'>
-              {categories.map((category, index) => (
+              {categoriesState.map((category, index) => (
                 <SortableCategory
                   key={category.id}
                   category={category}
-                  categories={categories}
-                  setCategories={setCategories}
+                  categories={categoriesState}
+                  setCategories={setCategoriesState}
                 />
               ))}
             </div>
           </div>
 
-          <div>
+          {/** Right column */}
+          <div className='flex flex-col items-center'>
+            <div>
+              <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
+            </div>
+            {a.map((item, index) => (
+              <div className='flex flex-row justify-between w-full py-14 bg-sepia-400' key={index}>
+                {item}
+                <PencilIcon />
+              </div>
+            ))}
+
             <button onClick={saveToSupabase} className='h-12 btn-secondary'>
               Speichern
             </button>

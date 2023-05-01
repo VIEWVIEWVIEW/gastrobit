@@ -18,7 +18,7 @@ type PageProps = {
   restaurant: Restaurant
 }
 
-import { Karte, Gericht, Category } from '../../home/restaurant/[id]/menu'
+import { Category, Karte } from "@/types/schema"
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
   /**

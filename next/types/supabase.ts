@@ -14,6 +14,7 @@ export interface Database {
           created_at: string | null
           demo: boolean
           domains: string[] | null
+          extra_presets: Json | null
           id: number
           karte: Json | null
           name: string
@@ -23,6 +24,7 @@ export interface Database {
           created_at?: string | null
           demo?: boolean
           domains?: string[] | null
+          extra_presets?: Json | null
           id?: number
           karte?: Json | null
           name: string
@@ -32,6 +34,7 @@ export interface Database {
           created_at?: string | null
           demo?: boolean
           domains?: string[] | null
+          extra_presets?: Json | null
           id?: number
           karte?: Json | null
           name?: string
