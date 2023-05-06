@@ -9,9 +9,6 @@ type Props = {
 }
 type Restaurant = Database['public']['Tables']['restaurants']['Row']
 
-
-
-
 const testpidser: Gericht = {
   id: 'lol',
   ueberschrift: 'Pizza Prosciutto ',
@@ -27,7 +24,6 @@ const testpidser: Gericht = {
     },
   ],
 }
-
 
 const testkarte: Karte = [
   {
@@ -114,7 +110,14 @@ import { GetServerSideProps } from 'next'
 import { Database } from '@/types/supabase'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import GerichtModal from '@/components/home/gerichtModal'
-import { category, Gericht, Categories, Category, categories, Karte } from '../../../../types/schema'
+import {
+  category,
+  Gericht,
+  Categories,
+  Category,
+  categories,
+  Karte,
+} from '../../../../types/schema'
 
 const DragIcon = (props: any) => (
   <svg
@@ -211,6 +214,8 @@ const Item = ({
   )
 }
 
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers'
+
 const SortableCategory = ({
   category,
   categories,
@@ -270,7 +275,10 @@ const SortableCategory = ({
         <h2 className='m-5 text-4xl'>{category.name}</h2>
 
         <div className='w-full'>
-          <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+          <DndContext
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
             <SortableContext
               items={category.gerichte}
               strategy={verticalListSortingStrategy}>
@@ -365,7 +373,9 @@ const Menu = (props: Props) => {
               <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
             </div>
             {a.map((item, index) => (
-              <div className='flex flex-row justify-between w-full py-14 bg-sepia-400' key={index}>
+              <div
+                className='flex flex-row justify-between w-full py-14 bg-sepia-400'
+                key={index}>
                 {item}
                 <PencilIcon />
               </div>
