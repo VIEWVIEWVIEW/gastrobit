@@ -9,12 +9,34 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      custom_domains: {
+        Row: {
+          created_at: string | null
+          domain: string
+          id: number
+          restaurant_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          domain: string
+          id?: number
+          restaurant_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          domain?: string
+          id?: number
+          restaurant_id?: number
+          user_id?: string
+        }
+      }
       restaurants: {
         Row: {
           created_at: string | null
           demo: boolean
-          domains: string[] | null
-          extra_presets: Json | null
+          extra_presets: Json
           id: number
           karte: Json | null
           name: string
@@ -23,8 +45,7 @@ export interface Database {
         Insert: {
           created_at?: string | null
           demo?: boolean
-          domains?: string[] | null
-          extra_presets?: Json | null
+          extra_presets?: Json
           id?: number
           karte?: Json | null
           name: string
@@ -33,8 +54,7 @@ export interface Database {
         Update: {
           created_at?: string | null
           demo?: boolean
-          domains?: string[] | null
-          extra_presets?: Json | null
+          extra_presets?: Json
           id?: number
           karte?: Json | null
           name?: string
@@ -46,7 +66,20 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      json_matches_schema: {
+        Args: {
+          schema: Json
+          instance: Json
+        }
+        Returns: boolean
+      }
+      jsonb_matches_schema: {
+        Args: {
+          schema: Json
+          instance: Json
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

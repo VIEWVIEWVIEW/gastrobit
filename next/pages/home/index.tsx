@@ -163,7 +163,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
                         <a
-                          href={'http://' + restaurant.domains![0]}
+                          href={'http://' +  "@TODO"}
                           className='py-3 hover:text-gray-400 hover:underline'>
                           Zur Website
                         </a>

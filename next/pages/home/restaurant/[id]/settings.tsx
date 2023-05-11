@@ -7,7 +7,13 @@ import {
 } from '@supabase/auth-helpers-react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, {
+  Dispatch,
+  Fragment,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
 
@@ -60,15 +66,19 @@ function Restaurant(props: Props) {
   const restaurant = props.restaurant
 
   const [subdomain, setSubdomain] = useState('')
+
+  const [customDomains, setCustomDomains] = useState<string[]>([
+    'test.com',
+    'test2.com',
+  ])
+
   const getGastrobitSubdomain = useCallback(() => {
-    if (!restaurant || !restaurant.domains) return
+    if (!restaurant) return
+    return '@TODO'
+    if (!restaurant || !restaurant.gastrobit_subdomain) return
 
-    const subdomain = restaurant?.domains.find(domain =>
-      domain.includes('gastrobit.de'),
-    )
-
-    if (subdomain) {
-      const subdomainWithoutTld = subdomain.split('.')[0]
+    if (restaurant.gastrobit_subdomain.includes('gastrobit.de')) {
+      const subdomainWithoutTld = restaurant.gastrobit_subdomain.split('.')[0]
       setSubdomain(subdomainWithoutTld)
     }
   }, [restaurant])
@@ -103,8 +113,6 @@ function Restaurant(props: Props) {
 
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
             <div className='space-y-8 divide-y sm:space-y-5'>
-
-
               {/** Settings */}
 
               <div>
@@ -125,7 +133,7 @@ function Restaurant(props: Props) {
                       Subdomain
                     </label>
                     <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                      <div className='flex max-w-lg rounded-md shadow-sm'>
+                      <div className='flex max-w-lg'>
                         <input
                           type='text'
                           name='subdomain'
@@ -141,6 +149,23 @@ function Restaurant(props: Props) {
                         </span>
                       </div>
                     </div>
+
+                    <CustomDomains
+                      domains={customDomains}
+                      setDomains={setCustomDomains}
+                    />
+
+                    <button
+                      className='col-start-2 mt-10 btn-primary'
+                      onClick={(e) => {
+                        e.preventDefault()
+                        const newDomains = [...customDomains]
+                        newDomains.push('')
+                        setCustomDomains(newDomains)
+                      }}>
+                      Eigene Domain hinzufügen
+                    </button>
+
                     <button className='col-start-2 mt-10 btn-primary'>
                       Speichern
                     </button>
@@ -155,7 +180,55 @@ function Restaurant(props: Props) {
   )
 }
 
-
-
+/**
+ * Render 5 textboxes for custom domains.
+ */
+const CustomDomains = ({
+  domains,
+  setDomains,
+}: {
+  domains: string[]
+  setDomains: Dispatch<string[]>
+}) => {
+  return (
+    <>
+      {domains.map((domain, index) => (
+        <Fragment key={index}>
+          <label
+            htmlFor='subdomain'
+            className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
+            Eigene Domain #{index + 1} {index === 0 && '(Primärdomain)'}
+          </label>
+          <div className='mt-1 sm:mt-0 sm:col-span-2'>
+            <div className='flex max-w-lg'>
+              <input
+                type='text'
+                name='subdomain'
+                id='subdomain'
+                autoComplete='subdomain'
+                className='flex-1 block w-full min-w-0 input'
+                value={domain}
+                onChange={e => {
+                  const newDomains = [...domains]
+                  newDomains[index] = e.target.value
+                  setDomains(newDomains)
+                }}
+              />
+              <span
+                className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-600'
+                onClick={() => {
+                  const newDomains = [...domains]
+                  newDomains.splice(index, 1)
+                  setDomains(newDomains)
+                }}>
+                Löschen
+              </span>
+            </div>
+          </div>
+        </Fragment>
+      ))}
+    </>
+  )
+}
 
 export default Restaurant

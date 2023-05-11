@@ -66,7 +66,7 @@ export function EnrollMFA({
       // URL that you can place in an <img> tag.
       setQR(data.totp.qr_code)
     })()
-  }, [])
+  }, [supabase.auth.mfa])
 
   return (
     <>

@@ -31,18 +31,17 @@ export default async function middleware(req: NextRequest) {
       still need to add "*.platformize.vercel.app" as a wildcard domain on your Vercel dashboard. */
   const currentHost =
     process.env.NODE_ENV === 'production' && process.env.VERCEL === '1'
-      ? hostname.replace(`.gastrobit.de`, '')
-      : hostname.replace(`.localhost:3000`, '')
+      ? hostname.replace(`.gastrobit.de`, '.gastrobit.de')
+      : hostname.replace(`.localhost:3000`, '.gastrobit.de')
 
-  console.log("hostname", hostname)
+  console.log('hostname', hostname)
 
   // rewrite root application to `/home` folder
   if (
-    hostname === 'localhost:3000' ||
-    hostname === 'www.localhost:3000' ||
     hostname === 'gastrobit.de' ||
     hostname === 'www.gastrobit.de' ||
-    hostname === 'gastrobit.vercel.app' 
+    hostname === 'localhost:3000' ||
+    hostname === 'www.localhost:3000'
   ) {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
@@ -54,18 +53,39 @@ export default async function middleware(req: NextRequest) {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbmJwcHNjZWR2cmxnbHlna3luIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDU2NjkwMiwiZXhwIjoxOTk2MTQyOTAyfQ.yFo5jlzaEu31TjrGH_sGJiSXMQk7u3mxSshcCtsRI3U',
   )
 
-  console.log('currentHost', hostname)
+  console.log('currentHost', currentHost)
 
   // get the restaurant id of our current host
   const { data, error } = await supabase
     .from('restaurants')
-    .select('id')
-    .overlaps('domains', [hostname])
+    .select('id, custom_domains !inner (restaurant_id)')
+    //.eq('custom_domains.domain', hostname)
+    //.eq('gastrobit_subdomain', currentHost)
+    // make an .or() query with the two conditions above
+    .or(`domain.eq.${currentHost}`, {
+      foreignTable: 'custom_domains',
+    })
+    .limit(1)
     .single()
+    
+    //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
+    //.single()
+    
+    
+    //.eq('gastrobit_subdomain', [rewrittenHostname])
+    //.or(`gastrobit_subdomain.eq.${rewrittenHostname}, 
+    //.or(`custom_domains.overlaps.[${hostname}]`)
+    //.overlaps('custom_domains', [hostname])
+    //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.ov.{${hostname}}`)
+    //.eq('gastrobit_subdomain', currentHost)
+    
+    //.single()
+
+  console.log('data', data, error)
 
   const restaurantId = data?.id
 
-  // if no restaurant id is found, the restaurant does not exist. We redirect to home
+  // if no restaurant id is found, the restaurant does not exist. We redirect to /home/404
   if (!restaurantId) {
     return NextResponse.rewrite(new URL(`/404.tsx`, req.url))
   }
