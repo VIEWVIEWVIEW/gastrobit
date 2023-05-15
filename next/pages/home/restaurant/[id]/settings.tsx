@@ -16,11 +16,15 @@ import React, {
 } from 'react'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
+import DomainCard from '@/components/home/domainCard'
+import useSWR from 'swr'
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row']
+type Domain = Database['public']['Tables']['custom_domains']['Row']
 
 type Props = {
   restaurant: Restaurant
+  domains: Domain[]
 }
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
@@ -39,53 +43,49 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
     }
 
   // else we fetch restaurant data
-  const { data: restaurant, error } = await supabase
+  const restaurantPromise = supabase // no await here so we can run both queries in parallel
     .from('restaurants')
     .select()
     .limit(1)
     .eq('id', ctx.params!.id)
     .single()
 
-  console.debug(restaurant)
+  // and custom domains
+  const domainsPromise = supabase
+    .from('custom_domains')
+    .select()
+    .eq('restaurant_id', ctx.params!.id)
+
+  // wait for both promises to resolve.
+  const [{ data: restaurant }, { data: domains }] = await Promise.all([
+    restaurantPromise,
+    domainsPromise,
+  ])
 
   return {
     props: {
       params: ctx.params,
       restaurant,
+      domains,
     },
   }
 }
 
-function Restaurant(props: Props) {
+function Restaurant({restaurant, domains}: Props) {
   const router = useRouter()
   const { id } = router.query
 
   const user = useUser()
   const supabase = useSupabaseClient<Database>()
 
-  const restaurant = props.restaurant
 
-  const [subdomain, setSubdomain] = useState('')
+  // we find the domain which ends on 'gastrobit.de', and split off everything after the dot. If no *.gastrobit.de domain is used, we use an empty string.
+  const [gastrobitSubdomain, setGastrobitSubdomain] = useState(domains.find(domain => domain.domain.includes('.gastrobit'))?.domain.split('.')[0] || '')
 
-  const [customDomains, setCustomDomains] = useState<string[]>([
-    'test.com',
-    'test2.com',
-  ])
+  const [customDomains, setCustomDomains] = useState(domains)
 
-  const getGastrobitSubdomain = useCallback(() => {
-    if (!restaurant) return
-    return '@TODO'
-    if (!restaurant || !restaurant.gastrobit_subdomain) return
-
-    if (restaurant.gastrobit_subdomain.includes('gastrobit.de')) {
-      const subdomainWithoutTld = restaurant.gastrobit_subdomain.split('.')[0]
-      setSubdomain(subdomainWithoutTld)
-    }
-  }, [restaurant])
-
-  useEffect(() => {
-    getGastrobitSubdomain()
-  }, [getGastrobitSubdomain, restaurant])
+  const { data: domainList, mutate: revalidateDomains } =
+    useSWR(`/api/get-domains`)
 
   if (!restaurant)
     return (
@@ -114,6 +114,7 @@ function Restaurant(props: Props) {
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
             <div className='space-y-8 divide-y sm:space-y-5'>
               {/** Settings */}
+              {JSON.stringify(customDomains)}
 
               <div>
                 <div>
@@ -141,8 +142,8 @@ function Restaurant(props: Props) {
                           autoComplete='subdomain'
                           className='flex-1 block w-full min-w-0 input'
                           placeholder='pizzapalast-hagen'
-                          value={subdomain}
-                          onChange={e => setSubdomain(e.target.value)}
+                          value={gastrobitSubdomain}
+                          onChange={e => setGastrobitSubdomain(e.target.value)}
                         />
                         <span className='inline-flex items-center px-3 text-gray-500 border-l-0 input bg-slate-200'>
                           .gastrobit.de
@@ -150,14 +151,9 @@ function Restaurant(props: Props) {
                       </div>
                     </div>
 
-                    <CustomDomains
-                      domains={customDomains}
-                      setDomains={setCustomDomains}
-                    />
-
                     <button
                       className='col-start-2 mt-10 btn-primary'
-                      onClick={(e) => {
+                      onClick={e => {
                         e.preventDefault()
                         const newDomains = [...customDomains]
                         newDomains.push('')

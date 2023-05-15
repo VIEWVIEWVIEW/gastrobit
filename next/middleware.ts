@@ -56,18 +56,23 @@ export default async function middleware(req: NextRequest) {
   console.log('currentHost', currentHost)
 
   // get the restaurant id of our current host
-  const { data, error } = await supabase
-    .from('restaurants')
-    .select('id, custom_domains !inner (restaurant_id)')
-    //.eq('custom_domains.domain', hostname)
-    //.eq('gastrobit_subdomain', currentHost)
-    // make an .or() query with the two conditions above
-    .or(`domain.eq.${currentHost}`, {
-      foreignTable: 'custom_domains',
-    })
-    .limit(1)
-    .single()
-    
+  const { data, error } = await supabase.from('custom_domains').select('*').eq('domain', currentHost).limit(1).single()
+
+
+  /**
+   * 
+  .from('restaurants')
+  .select('id, custom_domains !inner (restaurant_id)')
+  //.eq('custom_domains.domain', hostname)
+  //.eq('gastrobit_subdomain', currentHost)
+  // make an .or() query with the two conditions above
+  .or(`domain.eq.${currentHost}`, {
+    foreignTable: 'custom_domains',
+  })
+  .limit(1)
+  .single()
+  */
+  
     //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
     //.single()
     

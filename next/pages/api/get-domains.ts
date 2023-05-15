@@ -5,6 +5,7 @@ import {
   createServerSupabaseClient,
 } from '@supabase/auth-helpers-nextjs'
 import { Database } from '@/types/supabase'
+import { Domain } from '../../types/Domain'
 
 type NotAutenticated = {
   error?: string
@@ -13,18 +14,6 @@ type NotAutenticated = {
 
 type Response = {
   domains: Domain[]
-}
-
-type Domain = {
-  name: string
-  apexName: string
-  projectId: string
-  redirect: null
-  redirectStatusCode: null
-  gitBranch: string
-  updatedAt: EpochTimeStamp
-  createdAt: EpochTimeStamp
-  verified: boolean
 }
 
 type Pagination = {
@@ -122,7 +111,7 @@ async function fetchDomainsFromVercel() {
     // add to array
     vercelDomains = [...vercelDomains, ...json.domains]
 
-    // check if there is a next page
+    // set next to the next pagination key. If the key is null, we are done
     next = json.pagination.next
   } while (next)
 
@@ -133,8 +122,9 @@ async function removeUnusedDomains(
   unusedDomains: string[],
   supabase: SupabaseClient<Database>,
 ) {
-  await removeUnusedDomainsFromVercel(unusedDomains)
-  await removeUnusedDomainsFromGastrobit(unusedDomains, supabase)
+
+  const removal = [removeUnusedDomainsFromVercel(unusedDomains), removeUnusedDomainsFromGastrobit(unusedDomains, supabase)]
+  await Promise.all(removal)
 
   async function removeUnusedDomainsFromVercel(domains: string[]) {
     console.log("Removing domains from vercel:", domains)
