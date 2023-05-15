@@ -71,16 +71,19 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
   }
 }
 
-function Restaurant({restaurant, domains}: Props) {
+function Restaurant({ restaurant, domains }: Props) {
   const router = useRouter()
   const { id } = router.query
 
   const user = useUser()
   const supabase = useSupabaseClient<Database>()
 
-
   // we find the domain which ends on 'gastrobit.de', and split off everything after the dot. If no *.gastrobit.de domain is used, we use an empty string.
-  const [gastrobitSubdomain, setGastrobitSubdomain] = useState(domains.find(domain => domain.domain.includes('.gastrobit'))?.domain.split('.')[0] || '')
+  const [gastrobitSubdomain, setGastrobitSubdomain] = useState(
+    domains
+      .find(domain => domain.domain.includes('.gastrobit'))
+      ?.domain.split('.')[0] || '',
+  )
 
   const [customDomains, setCustomDomains] = useState(domains)
 
@@ -151,16 +154,13 @@ function Restaurant({restaurant, domains}: Props) {
                       </div>
                     </div>
 
-                    <button
-                      className='col-start-2 mt-10 btn-primary'
-                      onClick={e => {
-                        e.preventDefault()
-                        const newDomains = [...customDomains]
-                        newDomains.push('')
-                        setCustomDomains(newDomains)
-                      }}>
-                      Eigene Domain hinzufügen
-                    </button>
+                    {/** Custom Domains */}
+                    {customDomains.map((domain, index) => (
+                      <Fragment key={index}>
+                        <DomainCard domain={domain.domain} />
+                      </Fragment>
+                    ))}
+
 
                     <button className='col-start-2 mt-10 btn-primary'>
                       Speichern

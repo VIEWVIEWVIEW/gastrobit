@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { BeatLoader as Loader } from 'react-spinners'
 
 const DomainCard = ({ domain, revalidateDomains }: any) => {
+  return <></>
   const fetcher = (url: string) => fetch(url).then(res => res.json())
   const {
     data: domainInfo,
@@ -30,7 +31,6 @@ const DomainCard = ({ domain, revalidateDomains }: any) => {
           target='_blank'
           rel='noreferrer'
           className='flex items-center text-xl font-semibold text-left'>
-
           {domain}
           <span className='inline-block ml-2'>
             <svg
@@ -78,16 +78,17 @@ const DomainCard = ({ domain, revalidateDomains }: any) => {
             className={`${
               removing ? 'cursor-not-allowed bg-gray-100' : ''
             }bg-red-500 text-white border-red-500 hover:text-red-500 hover:bg-white py-1.5 w-24 text-sm border-solid border rounded-md focus:outline-none transition-all ease-in-out duration-150`}>
-            {removing ? <Loader margin={"0"} /> : 'Remove'}
+            {removing ? <Loader margin={'0'} /> : 'Remove'}
           </button>
         </div>
       </div>
 
       <ConfiguredSection domainInfo={domainInfo} />
 
-            <div className='text-white bg-slate-400'>
-                <Loader />:D
-            </div>
+      <div className='text-white bg-slate-400'>
+        <Loader />
+        :D
+      </div>
     </div>
   )
 }

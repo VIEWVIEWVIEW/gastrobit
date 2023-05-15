@@ -13,7 +13,7 @@ function getVerificationError(verificationResponse: any) {
   }
 }
 
-const ConfiguredSection = ({ domainInfo }) => {
+const ConfiguredSection = ({ domainInfo }: any) => {
   const [recordType, setRecordType] = useState('CNAME')
   if (!domainInfo) {
     return <>No Domain Info</>
@@ -21,7 +21,7 @@ const ConfiguredSection = ({ domainInfo }) => {
 
   if (!domainInfo.verified) {
     const txtVerification = domainInfo.verification.find(
-      (x) => x.type === 'TXT'
+      (x: any) => x.type === 'TXT'
     )
     return (
       <>

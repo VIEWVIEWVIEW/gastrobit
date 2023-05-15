@@ -49,8 +49,7 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
   const config: Config = await configRes.json()
   const domain: Domain = await domainRes.json()
 
-  console.log('configJson', config)
-  console.log('domainJson', domain)
+
 
   if (domainRes.status !== 200) {
     return res.status(domainRes.status).send(domain)
@@ -73,6 +72,8 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
     )
     verificationResponse = await verificationRes.json()
   }
+
+  console.log('verificationResponse', verificationResponse)
 
   if (verificationResponse && verificationResponse.verified) {
     /**

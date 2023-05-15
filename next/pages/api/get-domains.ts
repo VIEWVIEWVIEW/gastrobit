@@ -12,9 +12,7 @@ type NotAutenticated = {
   description?: string
 }
 
-type Response = {
-  domains: Domain[]
-}
+type Response = any
 
 type Pagination = {
   count: number
@@ -41,47 +39,29 @@ const handler: NextApiHandler = async (
         'The user does not have an active session or is not authenticated',
     })
 
-  // get all domains which match vercel + current user. RLS (row level security) is applied, as we use the user-session
-  let domains: Domain[] = []
-  try {
-    domains = await getDomains(supabase)
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ error: 'internal_server_error' })
-  }
-
-  res.status(200).json({ domains: domains })
-}
-
-async function getDomains(supabase: SupabaseClient<Database>) {
-  const vercelDomains = await fetchDomainsFromVercel()
-
-  // get all domains from the current user from supabase
-  const { data: supabaseDomains, error } = await supabase
+  // get all domains from supabase
+  const { data: domains, error } = await supabase
     .from('custom_domains')
     .select('*')
 
-  console.log('Vercel Domains', vercelDomains)
-  console.log('Supabase Domains', supabaseDomains)
+  // fetch all domains from vercel
+  const vercelDomains = await fetchDomainsFromVercel()
 
-  // if we have data
-  if (!supabaseDomains) throw new Error('no data')
+  // find all domains from vercel which are in supabase
+  const domainsInVercelAndSupabase = vercelDomains.filter((vercelDomain) => {
+    return domains?.find((domain) => domain.domain === vercelDomain.name)
+  })
 
-  // get all domains which are contained in supabase AND vercel
-  const filteredDomains = vercelDomains.filter(vercelDomain =>
-    supabaseDomains.find(domain => domain.domain === vercelDomain.name),
-  )
+  // find subdomain which ends with .gastrobit.de
+  const gastrobitSubdomain = domains?.find((domain) => {
+    return domain.domain.endsWith('.gastrobit.de')
+  })
 
-  // get all domains which are in supabase, but not in vercel
-  const unusedDomains = supabaseDomains.filter(
-    supabaseDomain =>
-      !vercelDomains.find(domain => domain.name === supabaseDomain.domain),
-  )
 
-  await removeUnusedDomains(unusedDomains.map(el => el.domain), supabase)
-  console.log('unusedDomains', unusedDomains)
+  // if there is an error, return it
+  if (error) return res.status(500).json({ error })
 
-  return filteredDomains
+  res.status(200).json(domainsInVercelAndSupabase)
 }
 
 async function fetchDomainsFromVercel() {
@@ -116,39 +96,6 @@ async function fetchDomainsFromVercel() {
   } while (next)
 
   return vercelDomains
-}
-
-async function removeUnusedDomains(
-  unusedDomains: string[],
-  supabase: SupabaseClient<Database>,
-) {
-
-  const removal = [removeUnusedDomainsFromVercel(unusedDomains), removeUnusedDomainsFromGastrobit(unusedDomains, supabase)]
-  await Promise.all(removal)
-
-  async function removeUnusedDomainsFromVercel(domains: string[]) {
-    console.log("Removing domains from vercel:", domains)
-    for (const domain of domains) {
-      /**
-       * await fetch(`https://api.vercel.com/v6/domains/${domain}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.AUTH_BEARER_TOKEN}`,
-        },
-        method: 'delete',
-      })
-      **/
-    }
-  }
-
-  async function removeUnusedDomainsFromGastrobit(
-    domains: string[],
-    supabase: SupabaseClient<Database>,
-  ) {
-    console.log("Removing domain from supabase:", domains)
-    for (const domain of domains) {
-      //await supabase.from('custom_domains').delete().match({ domain: domain })
-    }
-  }
 }
 
 export default handler
