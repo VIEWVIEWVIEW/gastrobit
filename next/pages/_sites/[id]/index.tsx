@@ -5,7 +5,7 @@ import type { ParsedUrlQuery } from 'querystring'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { Database } from '@/types/supabase'
 
-import RestaurantLayout from '@/Layouts/RestaurantLayout'
+import RestaurantLayout from '@/components/layouts/RestaurantLayout'
 
 interface PathProps extends ParsedUrlQuery {
   site: string

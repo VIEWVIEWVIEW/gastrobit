@@ -1,4 +1,4 @@
-import MainLayout from '@/Layouts/MainLayout'
+import MainLayout from '@/components/layouts/MainLayout'
 import { Database } from '@/types/supabase'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { GetServerSideProps } from 'next'
