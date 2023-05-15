@@ -1,4 +1,4 @@
-import MainLayout from '@/Layouts/MainLayout'
+import MainLayout from '@/layouts/MainLayout'
 import React, { Dispatch, DragEventHandler, useCallback, useState } from 'react'
 import { z } from 'zod'
 type Props = {

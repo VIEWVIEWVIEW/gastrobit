@@ -7,7 +7,7 @@ import { Navbar } from '@/components/home/navbar'
 const inter = Inter({ subsets: ['latin'] })
 
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import MainLayout from '@/Layouts/MainLayout'
+import MainLayout from '@/layouts/MainLayout'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { Database } from '@/types/supabase'

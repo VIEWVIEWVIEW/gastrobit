@@ -1,4 +1,4 @@
-import MainLayout from '@/Layouts/MainLayout'
+import MainLayout from '@/layouts/MainLayout'
 import { Database } from '@/types/supabase'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useEffect, useState } from 'react'
