@@ -33,10 +33,10 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
   // fetch the current restaurant
   const supabase = createServerSupabaseClient<Database>(ctx)
 
+  console.warn('Restaurant id', ctx.params!.id, "domain")
   const { data: restaurant, error } = await supabase
     .from('restaurants')
     .select()
-    .limit(1)
     .eq('id', ctx.params!.id)
     .single()
 

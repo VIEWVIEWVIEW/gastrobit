@@ -85,7 +85,8 @@ function Restaurant({ restaurant, domains }: Props) {
       ?.domain.split('.')[0] || '',
   )
 
-  const [customDomains, setCustomDomains] = useState(domains)
+  // remove all domains which end on 'gastrobit.de'
+  const [customDomains, setCustomDomains] = useState(domains.filter(domain => !domain.domain.includes('.gastrobit')))
 
   const { data: domainList, mutate: revalidateDomains } =
     useSWR(`/api/get-domains`)
