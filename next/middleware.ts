@@ -41,7 +41,8 @@ export default async function middleware(req: NextRequest) {
     hostname === 'gastrobit.de' ||
     hostname === 'www.gastrobit.de' ||
     hostname === 'localhost:3000' ||
-    hostname === 'www.localhost:3000'
+    hostname === 'www.localhost:3000' ||
+    hostname === 'gastrobit.vercel.app' // preview deployment on vercel
   ) {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
