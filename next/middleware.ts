@@ -89,7 +89,7 @@ export default async function middleware(req: NextRequest) {
 
   console.log('data', data, error)
 
-  const restaurantId = data?.id
+  const restaurantId = data?.restaurant_id
 
   // if no restaurant id is found, the restaurant does not exist. We redirect to /home/404
   if (!restaurantId) {
