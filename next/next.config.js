@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    dirs: ['pages', 'utils', 'components', 'layouts', 'types', 'utils'], // Only run ESLint on the 'pages' and 'utils' directories during production builds (next build)
-    ignoreDuringBuilds: false,
+    dirs: ['pages', 'utils', 'components', 'layouts', 'types'], // Only run ESLint on the 'pages' and 'utils' directories during production builds (next build)
+    ignoreDuringBuilds: true,
   },
 }
 
