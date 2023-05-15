@@ -8,7 +8,7 @@ import {
 import { Auth } from '@supabase/auth-ui-react'
 import locale from '@/components/home/supabaseAuthLocale.json'
 
-import MainLayout from '@/layouts/MainLayout'
+import MainLayout from '@/Layouts/MainLayout'
 import { useRouter } from 'next/router'
 
 function Login() {

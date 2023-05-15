@@ -1,4 +1,4 @@
-import MainLayout from '@/layouts/MainLayout'
+import MainLayout from '@/Layouts/MainLayout'
 import React, { useEffect } from 'react'
 import {
   useUser,
