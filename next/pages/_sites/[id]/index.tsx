@@ -2,9 +2,10 @@ import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 
 import type { ParsedUrlQuery } from 'querystring'
-import RestaurantLayout from '@/Layouts/RestaurantLayout'
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { Database } from '@/types/supabase'
+
+import RestaurantLayout from '@/components/layouts/RestaurantLayout'
 
 interface PathProps extends ParsedUrlQuery {
   site: string
@@ -32,10 +33,10 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
   // fetch the current restaurant
   const supabase = createServerSupabaseClient<Database>(ctx)
 
+  console.warn('Restaurant id', ctx.params!.id, "domain")
   const { data: restaurant, error } = await supabase
     .from('restaurants')
     .select()
-    .limit(1)
     .eq('id', ctx.params!.id)
     .single()
 

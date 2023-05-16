@@ -41,7 +41,8 @@ export default async function middleware(req: NextRequest) {
     hostname === 'gastrobit.de' ||
     hostname === 'www.gastrobit.de' ||
     hostname === 'localhost:3000' ||
-    hostname === 'www.localhost:3000'
+    hostname === 'www.localhost:3000' ||
+    hostname === 'gastrobit.vercel.app' // preview deployment on vercel
   ) {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
@@ -56,18 +57,23 @@ export default async function middleware(req: NextRequest) {
   console.log('currentHost', currentHost)
 
   // get the restaurant id of our current host
-  const { data, error } = await supabase
-    .from('restaurants')
-    .select('id, custom_domains !inner (restaurant_id)')
-    //.eq('custom_domains.domain', hostname)
-    //.eq('gastrobit_subdomain', currentHost)
-    // make an .or() query with the two conditions above
-    .or(`domain.eq.${currentHost}`, {
-      foreignTable: 'custom_domains',
-    })
-    .limit(1)
-    .single()
-    
+  const { data, error } = await supabase.from('custom_domains').select('*').eq('domain', currentHost).limit(1).single()
+
+
+  /**
+   * 
+  .from('restaurants')
+  .select('id, custom_domains !inner (restaurant_id)')
+  //.eq('custom_domains.domain', hostname)
+  //.eq('gastrobit_subdomain', currentHost)
+  // make an .or() query with the two conditions above
+  .or(`domain.eq.${currentHost}`, {
+    foreignTable: 'custom_domains',
+  })
+  .limit(1)
+  .single()
+  */
+  
     //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
     //.single()
     
@@ -83,7 +89,7 @@ export default async function middleware(req: NextRequest) {
 
   console.log('data', data, error)
 
-  const restaurantId = data?.id
+  const restaurantId = data?.restaurant_id
 
   // if no restaurant id is found, the restaurant does not exist. We redirect to /home/404
   if (!restaurantId) {
