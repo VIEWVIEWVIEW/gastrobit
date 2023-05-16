@@ -120,11 +120,13 @@ const Navbar = () => {
                   ))}
                 </div>
                 <div className='px-5 mt-6'>
-                  <a
+{/**
+ *                   <a
                     href='#'
                     className='block w-full px-4 py-3 font-medium text-center text-white rounded-md shadow bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700'>
                     Start free trial
                   </a>
+ */}
                 </div>
                 <div className='px-5 mt-6'>
                   <p className='text-base font-medium text-center text-gray-500'>
