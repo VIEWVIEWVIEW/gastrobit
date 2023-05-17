@@ -88,6 +88,8 @@ function Restaurant({ restaurant, domains }: Props) {
   // remove all domains which end on 'gastrobit.de'
   const [customDomains, setCustomDomains] = useState(domains.filter(domain => !domain.domain.includes('.gastrobit')))
 
+  const [newCustomDomain, setNewCustomDomain] = useState('')
+
   const { data: domainList, mutate: revalidateDomains } =
     useSWR(`/api/get-domains`)
 
@@ -154,6 +156,31 @@ function Restaurant({ restaurant, domains }: Props) {
                         </span>
                       </div>
                     </div>
+
+                    <hr className='col-span-3' />
+                    <label
+                      htmlFor='customDomain'
+                      className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
+                      Eigene Domain hinzufügen
+                    </label>
+                    <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                      <div className='flex max-w-lg'>
+                        <input
+                          type='text'
+                          name='customDomain'
+                          id='customDomain'
+                          autoComplete='customDomain'
+                          className='flex-1 block w-full min-w-0 input'
+                          placeholder='pizzapalast.de'
+                          value={newCustomDomain}
+                          onChange={e => setNewCustomDomain(e.target.value)}
+                        />
+                        <span className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-500'>
+                          Hinzufügen
+                        </span>
+                      </div>
+                    </div>
+                  
 
                     {/** Custom Domains */}
                     {customDomains.map((domain, index) => (
