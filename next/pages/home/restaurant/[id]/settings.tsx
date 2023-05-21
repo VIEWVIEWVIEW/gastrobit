@@ -71,6 +71,21 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
   }
 }
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
+interface GetDomainsAnswer {
+  name: string;
+  apexName: string;
+  projectId: string;
+  redirect: null;
+  redirectStatusCode: null;
+  gitBranch: null | string;
+  updatedAt: number;
+  createdAt: number;
+  verified: boolean;
+}
+
+
 function Restaurant({ restaurant, domains }: Props) {
   const router = useRouter()
   const { id } = router.query
@@ -85,13 +100,14 @@ function Restaurant({ restaurant, domains }: Props) {
       ?.domain.split('.')[0] || '',
   )
 
-  // remove all domains which end on 'gastrobit.de'
-  const [customDomains, setCustomDomains] = useState(domains.filter(domain => !domain.domain.includes('.gastrobit')))
+  // set list of customdomains, which don't belong to the subdomain 'gastrobit.de'
 
   const [newCustomDomain, setNewCustomDomain] = useState('')
 
-  const { data: domainList, mutate: revalidateDomains } =
-    useSWR(`/api/get-domains`)
+  const { data: domainList, mutate: revalidateDomains, isLoading } =
+    useSWR<GetDomainsAnswer[]>(`/api/get-domains`, fetcher, {
+      refreshInterval: 5000,
+    })
 
   if (!restaurant)
     return (
@@ -120,7 +136,7 @@ function Restaurant({ restaurant, domains }: Props) {
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
             <div className='space-y-8 divide-y sm:space-y-5'>
               {/** Settings */}
-              {JSON.stringify(customDomains)}
+              {isLoading && JSON.stringify(domainList)}
 
               <div>
                 <div>
@@ -180,12 +196,12 @@ function Restaurant({ restaurant, domains }: Props) {
                         </span>
                       </div>
                     </div>
-                  
+
 
                     {/** Custom Domains */}
-                    {customDomains.map((domain, index) => (
+                    {!isLoading && domainList.map((domain, index) => (
                       <Fragment key={index}>
-                        <DomainCard domain={domain.domain} />
+                        <DomainCard domain={domain.name} revalidateDomains={revalidateDomains} />
                       </Fragment>
                     ))}
 

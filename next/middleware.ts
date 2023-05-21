@@ -56,8 +56,30 @@ export default async function middleware(req: NextRequest) {
 
   console.log('currentHost', currentHost)
 
+
+  // if the current domain is a gastrobit subdomain, we can directly get the restaurant id from the subdomain
+  if (currentHost.includes('gastrobit.de')) {
+    const { data: restaurant, error } = await supabase
+      .from('restaurants')
+      .select('id')
+      .eq('subdomain', currentHost)
+      .limit(1)
+      .single()
+
+    if (error || !restaurant) {
+      return NextResponse.rewrite(new URL(`/404.tsx`, req.url))
+    }
+
+    return NextResponse.rewrite(
+      new URL(`/_sites/${restaurant.id}${path}`, req.url),
+    )
+  }
+
+
   // get the restaurant id of our current host
-  const { data, error } = await supabase.from('custom_domains').select('*').eq('domain', currentHost).limit(1).single()
+  const { data: customDomainRow, error } = await supabase.from('custom_domains').select('*').eq('domain', currentHost).limit(1).single()
+
+
 
 
   /**
@@ -73,23 +95,23 @@ export default async function middleware(req: NextRequest) {
   .limit(1)
   .single()
   */
-  
-    //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
-    //.single()
-    
-    
-    //.eq('gastrobit_subdomain', [rewrittenHostname])
-    //.or(`gastrobit_subdomain.eq.${rewrittenHostname}, 
-    //.or(`custom_domains.overlaps.[${hostname}]`)
-    //.overlaps('custom_domains', [hostname])
-    //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.ov.{${hostname}}`)
-    //.eq('gastrobit_subdomain', currentHost)
-    
-    //.single()
 
-  console.log('data', data, error)
+  //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
+  //.single()
 
-  const restaurantId = data?.restaurant_id
+
+  //.eq('gastrobit_subdomain', [rewrittenHostname])
+  //.or(`gastrobit_subdomain.eq.${rewrittenHostname}, 
+  //.or(`custom_domains.overlaps.[${hostname}]`)
+  //.overlaps('custom_domains', [hostname])
+  //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.ov.{${hostname}}`)
+  //.eq('gastrobit_subdomain', currentHost)
+
+  //.single()
+
+  console.log('data', customDomainRow, error)
+
+  const restaurantId = customDomainRow?.restaurant_id
 
   // if no restaurant id is found, the restaurant does not exist. We redirect to /home/404
   if (!restaurantId) {

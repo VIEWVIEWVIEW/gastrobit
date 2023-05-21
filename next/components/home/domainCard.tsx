@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { BeatLoader as Loader } from 'react-spinners'
 
 const DomainCard = ({ domain, revalidateDomains }: any) => {
-  return <></>
   const fetcher = (url: string) => fetch(url).then(res => res.json())
   const {
     data: domainInfo,
@@ -55,11 +54,10 @@ const DomainCard = ({ domain, revalidateDomains }: any) => {
               mutate(`/api/check-domain?domain=${domain}`)
             }}
             disabled={isValidating}
-            className={`${
-              isValidating
-                ? 'cursor-not-allowed bg-gray-100'
-                : 'bg-white hover:text-black hover:border-black'
-            } text-gray-500 border-gray-200 py-1.5 w-24 text-sm border-solid border rounded-md focus:outline-none transition-all ease-in-out duration-150`}>
+            className={`${isValidating
+              ? 'cursor-not-allowed bg-gray-100'
+              : 'bg-white hover:text-black hover:border-black'
+              } text-gray-500 border-gray-200 py-1.5 w-24 text-sm border-solid border rounded-md focus:outline-none transition-all ease-in-out duration-150`}>
             {isValidating ? <Loader /> : 'Refresh'}
           </button>
           <button
@@ -75,15 +73,15 @@ const DomainCard = ({ domain, revalidateDomains }: any) => {
               }
             }}
             disabled={removing}
-            className={`${
-              removing ? 'cursor-not-allowed bg-gray-100' : ''
-            }bg-red-500 text-white border-red-500 hover:text-red-500 hover:bg-white py-1.5 w-24 text-sm border-solid border rounded-md focus:outline-none transition-all ease-in-out duration-150`}>
+            className={`${removing ? 'cursor-not-allowed bg-gray-100' : ''
+              }bg-red-500 text-white border-red-500 hover:text-red-500 hover:bg-white py-1.5 w-24 text-sm border-solid border rounded-md focus:outline-none transition-all ease-in-out duration-150`}>
             {removing ? <Loader margin={'0'} /> : 'Remove'}
           </button>
         </div>
       </div>
-
+      {/* 
       <ConfiguredSection domainInfo={domainInfo} />
+ */}
 
       <div className='text-white bg-slate-400'>
         <Loader />

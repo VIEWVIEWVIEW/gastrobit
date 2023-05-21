@@ -49,15 +49,12 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
   const config: Config = await configRes.json()
   const domain: Domain = await domainRes.json()
 
-
-
   if (domainRes.status !== 200) {
     return res.status(domainRes.status).send(domain)
   }
 
-  /**
-   * If domain is not verified, we try to verify now
-   */
+  
+  // If domain is not verified, we try to verify now
   let verificationResponse = null
   if (!domain.verified) {
     const verificationRes = await fetch(
@@ -73,12 +70,10 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
     verificationResponse = await verificationRes.json()
   }
 
-  console.log('verificationResponse', verificationResponse)
+  console.log(domain, config, verificationResponse)
 
   if (verificationResponse && verificationResponse.verified) {
-    /**
-     * Domain was just verified
-     */
+    // Domain was just verified
     return res.status(200).json({
       configured: !config.misconfigured,
       ...verificationResponse,
