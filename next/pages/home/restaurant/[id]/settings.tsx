@@ -199,7 +199,7 @@ function Restaurant({ restaurant, domains }: Props) {
 
 
                     {/** Custom Domains */}
-                    {!isLoading && domainList.map((domain, index) => (
+                    {!isLoading && domainList?.map((domain, index) => (
                       <Fragment key={index}>
                         <DomainCard domain={domain.name} revalidateDomains={revalidateDomains} />
                       </Fragment>
