@@ -41,6 +41,7 @@ export interface Database {
           karte: Json | null
           name: string
           owner_id: string
+          subdomain: string | null
         }
         Insert: {
           created_at?: string | null
@@ -50,6 +51,7 @@ export interface Database {
           karte?: Json | null
           name: string
           owner_id: string
+          subdomain?: string | null
         }
         Update: {
           created_at?: string | null
@@ -59,6 +61,7 @@ export interface Database {
           karte?: Json | null
           name?: string
           owner_id?: string
+          subdomain?: string | null
         }
       }
     }

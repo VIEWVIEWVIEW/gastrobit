@@ -56,6 +56,8 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
     .select()
     .eq('restaurant_id', ctx.params!.id)
 
+    
+
   // wait for both promises to resolve.
   const [{ data: restaurant }, { data: domains }] = await Promise.all([
     restaurantPromise,
@@ -73,7 +75,7 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-interface GetDomainsAnswer {
+export interface GetDomainsAnswer {
   name: string;
   apexName: string;
   projectId: string;
@@ -94,19 +96,15 @@ function Restaurant({ restaurant, domains }: Props) {
   const supabase = useSupabaseClient<Database>()
 
   // we find the domain which ends on 'gastrobit.de', and split off everything after the dot. If no *.gastrobit.de domain is used, we use an empty string.
-  const [gastrobitSubdomain, setGastrobitSubdomain] = useState(
-    domains
-      .find(domain => domain.domain.includes('.gastrobit'))
-      ?.domain.split('.')[0] || '',
-  )
+  const [gastrobitSubdomain, setGastrobitSubdomain] = useState(restaurant.subdomain?.split('.')[0] || '')
 
   // set list of customdomains, which don't belong to the subdomain 'gastrobit.de'
 
   const [newCustomDomain, setNewCustomDomain] = useState('')
 
   const { data: domainList, mutate: revalidateDomains, isLoading } =
-    useSWR<GetDomainsAnswer[]>(`/api/get-domains`, fetcher, {
-      refreshInterval: 5000,
+    useSWR<GetDomainsAnswer[]>(`/api/get-domains?restaurant=${restaurant.id}`, fetcher, {
+      refreshInterval: 15000,
     })
 
   if (!restaurant)
@@ -136,7 +134,7 @@ function Restaurant({ restaurant, domains }: Props) {
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
             <div className='space-y-8 divide-y sm:space-y-5'>
               {/** Settings */}
-              {isLoading && JSON.stringify(domainList)}
+              {JSON.stringify(domainList)}
 
               <div>
                 <div>
@@ -201,7 +199,7 @@ function Restaurant({ restaurant, domains }: Props) {
                     {/** Custom Domains */}
                     {!isLoading && domainList?.map((domain, index) => (
                       <Fragment key={index}>
-                        <DomainCard domain={domain.name} revalidateDomains={revalidateDomains} />
+                        <DomainCard domain={domain.name} revalidateDomains={revalidateDomains} index={index} />
                       </Fragment>
                     ))}
 
