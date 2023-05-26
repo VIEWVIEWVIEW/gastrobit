@@ -58,7 +58,7 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
   let verificationResponse = null
   if (!domain.verified) {
     const verificationRes = await fetch(
-      `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain}/verify`,
+      `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domainFromQuerystring}/verify`,
       {
         method: 'POST',
         headers: {

@@ -1,9 +1,24 @@
 import ConfiguredSection from './configuredSection'
-import useSWR, { KeyedMutator, mutate } from 'swr'
+import useSWR, { Fetcher, KeyedMutator, mutate } from 'swr'
 import { useState } from 'react'
 import { BeatLoader as Loader } from 'react-spinners'
 import { GetDomainsAnswer } from '@/pages/home/restaurant/[id]/settings'
 
+export interface Verification {
+  type: string;
+  domain: string;
+  value: string;
+  reason: string;
+}
+
+export interface VerificationResponse {
+  error: Error;
+}
+
+export interface Error {
+  code: string;
+  message: string;
+}
 
 export interface CheckDomainAnswer {
   configured: boolean;
@@ -16,9 +31,11 @@ export interface CheckDomainAnswer {
   updatedAt: number;
   createdAt: number;
   verified: boolean;
+  verification?: Verification[];
+  verificationResponse?: VerificationResponse;
 }
 
-const fetcher = (url: string): Promise<CheckDomainAnswer> => fetch(url).then(res => res.json())
+const fetcher: Fetcher<CheckDomainAnswer> = (url: string) => fetch(url).then(res => res.json())
 
 const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, revalidateDomains: KeyedMutator<GetDomainsAnswer[]>, index: number }) => {
   const {
@@ -29,6 +46,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
   } = useSWR(`/api/check-domain?domain=${domain}`, fetcher, {
     revalidateOnMount: true,
     refreshInterval: 15000,
+    keepPreviousData: true,
     onSuccess: () => {
       console.log(domainInfo)
     },
@@ -38,6 +56,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
   })
 
   const [removing, setRemoving] = useState(false)
+
 
   return (
     <>
@@ -121,14 +140,36 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
 
 const Configured = () => (
   <>
-    Configured</>
+    <div className='flex flex-row'>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      </svg>
+      Korrekt konfiguriert
+    </div>
+  </>
 )
 
-const Unconfigured = ({ domainInfo }: { domainInfo: CheckDomainAnswer }) => {
+const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
   const [recordType, setRecordType] = useState<'CNAME' | 'A'>('CNAME')
-  return <>
-    Unconfigured</>
 
+  if (!domainInfo) {
+    console.error('No domain info')
+    return <></>
+  }
+
+  return <>
+  {JSON.stringify(domainInfo)}</>
+
+  // if the domain needs to be verified
+  if (!domainInfo.verified) {
+    const txtVerification = domainInfo.verification.find(
+      (x: any) => x.type === 'TXT'
+    )
+
+    return <>
+      Unconfigured</>
+
+  }
 }
 
 
