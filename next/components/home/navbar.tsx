@@ -288,7 +288,7 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
               <a
                 className='text-base font-medium text-white hover:text-gray-300'
                 href='/profile'>
-                {session.user.email}AAAAAAAAA
+                {session.user.email}
               </a>
               <a
                 onClick={logout}

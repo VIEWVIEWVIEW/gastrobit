@@ -42,9 +42,9 @@ const AddRestaurant = (props: Props) => {
                         placeholder='Pizzapalast Hagen UG'
                         className="block w-full max-w-lg input sm:max-w-xs sm:text-sm"
                       />
+                      {errors.restaurantName && <span className='text-sm'>Dieses Feld muss ausgefüllt werden</span>}
                     </div>
                   </div>
-                  {errors.businessType && <span>This field is required</span>}
 
 
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
@@ -56,6 +56,7 @@ const AddRestaurant = (props: Props) => {
                         autoComplete="business_type"
                         className="block w-full max-w-lg input sm:max-w-xs sm:text-sm"
                         {...register("businessType", { required: true })}
+
                       >
                         <option value="company">Unternehmen</option>
                         <option value="individuum">Individuum</option>
@@ -75,7 +76,7 @@ const AddRestaurant = (props: Props) => {
                 Abbrechen
               </Link>
 
-              <input type="submit" className="inline-flex justify-center cursor-pointer btn-primary" />
+              <input type="submit" className="inline-flex justify-center cursor-pointer btn-primary" value={"Weiter"} />
 
             </div>
 
