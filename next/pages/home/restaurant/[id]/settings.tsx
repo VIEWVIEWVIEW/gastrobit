@@ -18,6 +18,7 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
 import DomainCard from '@/components/home/domainCard'
 import useSWR from 'swr'
+import { toast } from 'react-hot-toast'
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row']
 type Domain = Database['public']['Tables']['custom_domains']['Row']
@@ -56,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
     .select()
     .eq('restaurant_id', ctx.params!.id)
 
-    
+
 
   // wait for both promises to resolve.
   const [{ data: restaurant }, { data: domains }] = await Promise.all([
@@ -107,6 +108,50 @@ function Restaurant({ restaurant, domains }: Props) {
       refreshInterval: 15000,
     })
 
+
+  const [loading, setLoading] = useState(false)
+
+  const addDomainToRestaurant = async (e: any) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const fetchData = new Promise((resolve, reject) => {
+      fetch(`/api/add-domain`, {
+        method: 'POST',
+        body: JSON.stringify({
+          restaurantId: restaurant.id,
+          domain: newCustomDomain,
+        }),
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(res => {
+        if (res.status === 200) {
+          resolve(res.json())
+        } else {
+          reject(res.json())
+        }
+      })
+    })
+
+    toast.promise(fetchData, {
+      loading: 'Domain wird hinzugefügt...',
+      success: (data: any) => `Erfolgreich gespeichert: ${data.name}`,
+      error: (err) => err.message,
+    })
+
+    setLoading(false)
+  }
+
+
+
+
+
+
+
+
+
   if (!restaurant)
     return (
       <MainLayout>
@@ -120,7 +165,7 @@ function Restaurant({ restaurant, domains }: Props) {
             </a>
           </div>
         </div>
-      </MainLayout>
+      </MainLayout >
     )
 
   return (
@@ -189,24 +234,25 @@ function Restaurant({ restaurant, domains }: Props) {
                           value={newCustomDomain}
                           onChange={e => setNewCustomDomain(e.target.value)}
                         />
-                        <span className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-500'>
+                        <button className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-500'
+                          onClick={addDomainToRestaurant} disabled={isLoading}>
                           Hinzufügen
-                        </span>
+                        </button>
                       </div>
                     </div>
 
 
+
+
+                  </div>
+
+                  <div>
                     {/** Custom Domains */}
                     {!isLoading && domainList?.map((domain, index) => (
                       <Fragment key={index}>
                         <DomainCard domain={domain.name} revalidateDomains={revalidateDomains} index={index} />
                       </Fragment>
                     ))}
-
-
-                    <button className='col-start-2 mt-10 btn-primary'>
-                      Speichern
-                    </button>
                   </div>
                 </div>
               </div>

@@ -19,7 +19,7 @@
   }
 
   .input {
-    @apply border-2 border-sepia-800 bg-sentrysilver-300 focus:border-sepia-800 focus:ring-0;
+    @apply border-2 border-sepia-800 bg-sentrysilver-300 focus:border-sepia-800 focus:ring-0 ring-0;
   }
 }
 

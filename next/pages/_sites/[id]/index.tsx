@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 
 import type { ParsedUrlQuery } from 'querystring'
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentSupabaseClient, createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { Database } from '@/types/supabase'
 
 import RestaurantLayout from '@/components/layouts/RestaurantLayout'

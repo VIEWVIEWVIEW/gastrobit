@@ -284,11 +284,11 @@ const LoggedInNavbar = ({ session }: { session: Session }) => {
                 <Restaurants restaurants={restaurants} />
               </div>
             </div>
-            <div className='flex-row space-x-6 md:flex md:items-center sm:hidden'>
+            <div className='flex-row items-center hidden space-x-6 md:flex '>
               <a
                 className='text-base font-medium text-white hover:text-gray-300'
                 href='/profile'>
-                {session.user.email}
+                {session.user.email}AAAAAAAAA
               </a>
               <a
                 onClick={logout}

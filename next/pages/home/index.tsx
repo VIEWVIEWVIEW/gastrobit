@@ -58,10 +58,15 @@ const RestaurantList = () => {
 
   useEffect(() => {
     const fetchRestaurants = async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+
+      if (userError) return console.log('error', userError)
+      
       const { data: restaurants, error } = await supabase
         .from('restaurants')
         .select()
         .order('created_at', { ascending: true })
+        .eq('user_id', userData.user?.id)
 
       if (error) console.log('error', error)
       else setRestaurants(restaurants)
@@ -92,9 +97,9 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
           </p>
         </div>
         <div className='mt-4 sm:mt-0 sm:ml-16 sm:flex-none'>
-          <button type='button' className='btn-primary'>
+          <Link className='btn-primary' href={'/restaurant/add'}>
             Restaurant hinzufügen
-          </button>
+          </Link>
         </div>
       </div>
       <div className='flex flex-col mt-8'>
@@ -163,7 +168,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
                         <a
-                          href={'http://' +  "@TODO"}
+                          href={'http://' + "@TODO"}
                           className='py-3 hover:text-gray-400 hover:underline'>
                           Zur Website
                         </a>

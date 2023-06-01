@@ -67,8 +67,8 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
           className='block text-sm font-medium text-gray-700 '>
           Custom Domain #{index + 1}
         </label>
-        <div className='mt-1 sm:mt-0 sm:col-span-2'>
-          <div className='flex max-w-lg row'>
+        <div className='mt-1 sm:mt-0'>
+          <div className='flex row'>
             <a
               href={`http://${domain}`}
               target='_blank'
@@ -103,11 +103,12 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 className={`${isValidating
                   ? 'cursor-not-allowed bg-gray-100'
                   : 'bg-white hover:text-black hover:border-black'
-                  } btn-secondary transition-all ease-in-out duration-150`}>
+                  } btn-secondary hover:bg-sentrysilver-100`}>
                 {isValidating ? <Loader /> : 'Refresh'}
               </button>
               <button
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.preventDefault()
                   setRemoving(true)
                   try {
                     await fetch(`/api/remove-domain?domain=${domain}`)
@@ -120,7 +121,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 }}
                 disabled={removing}
                 className={`${removing ? 'cursor-not-allowed bg-gray-100' : ''
-                  }btn-red transition-all ease-in-out duration-150`}>
+                  }btn-red`}>
                 {removing ? <Loader margin={'0'} /> : 'Remove'}
               </button>
             </div>
@@ -140,8 +141,8 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
 
 const Configured = () => (
   <>
-    <div className='flex flex-row'>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+    <div className='flex flex-row gap-x-2'>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-white bg-green-600">
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
       </svg>
       Korrekt konfiguriert
@@ -157,19 +158,57 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
     return <></>
   }
 
-  return <>
-  {JSON.stringify(domainInfo)}</>
 
   // if the domain needs to be verified
-  if (!domainInfo.verified) {
+  if (!domainInfo.verified && domainInfo.verification) {
     const txtVerification = domainInfo.verification.find(
       (x: any) => x.type === 'TXT'
     )
 
+    if (!txtVerification) {
+      console.error('No TXT verification')
+      return <>No TXT verification</>
+    }
+
     return <>
-      Unconfigured</>
+      <div className='flex flex-row gap-x-2'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-black bg-yellow-400">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+
+        Domain muss verifiziert werden
+      </div>
+      <div className='flex flex-col'>
+        <div className="flex items-start justify-start p-2 space-x-10 bg-sepia-100">
+          <div>
+            <p className="text-sm font-bold">Type</p>
+            <p className="mt-2 font-mono text-sm">{txtVerification.type}</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold">Name</p>
+            <p className="mt-2 font-mono text-sm">
+              {txtVerification.domain.slice(
+                0,
+                txtVerification.domain.length -
+                domainInfo.apexName.length -
+                1
+              )}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-bold">Value</p>
+            <p className="mt-2 font-mono text-sm">
+              <span className="text-ellipsis">{txtVerification.value}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
 
   }
+
+  return <>
+    Unconfigured</>
 }
 
 
