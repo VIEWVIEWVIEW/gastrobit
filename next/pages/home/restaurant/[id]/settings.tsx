@@ -14,7 +14,7 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserSupabaseClient, createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
 import DomainCard from '@/components/home/domainCard'
 import useSWR from 'swr'
@@ -109,11 +109,13 @@ function Restaurant({ restaurant, domains }: Props) {
     })
 
 
-  const [loading, setLoading] = useState(false)
+  const [addCustomDomainLoadingAnimation, setAddCustomDomainLoadingAnimation] = useState(false)
+  const [updatingSubdomain, setUpdatingSubdomain] = useState(false)
 
+  // add a new custom domain
   const addDomainToRestaurant = async (e: any) => {
     e.preventDefault()
-    setLoading(true)
+    setAddCustomDomainLoadingAnimation(true)
 
     const fetchData = new Promise((resolve, reject) => {
       fetch(`/api/add-domain`, {
@@ -128,6 +130,7 @@ function Restaurant({ restaurant, domains }: Props) {
         },
       }).then(async res => {
         if (res.status === 200) {
+          revalidateDomains()
           resolve(await res.json())
         } else {
           reject(await res.json())
@@ -141,8 +144,33 @@ function Restaurant({ restaurant, domains }: Props) {
       error: (err) => err.message,
     })
 
-    setLoading(false)
+    setAddCustomDomainLoadingAnimation(false)
   }
+
+  // update the .gastrobit.de subdomain
+  const updateSubdomain = async (e: any) => {
+    e.preventDefault()
+
+    setUpdatingSubdomain(true)
+
+    const supabase = createBrowserSupabaseClient<Database>()
+
+    const { data, error } = await supabase
+      .from('restaurants')
+      .update({ subdomain: `${gastrobitSubdomain}.gastrobit.de` })
+      .eq('id', restaurant.id)
+
+    if (error) {
+      toast.error(error.message)
+    } else {
+      toast.success('Subdomain erfolgreich geändert.')
+    }
+
+    setUpdatingSubdomain(false)
+  }
+
+
+
 
 
   if (!restaurant)
@@ -172,7 +200,6 @@ function Restaurant({ restaurant, domains }: Props) {
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
             <div className='space-y-8 divide-y sm:space-y-5'>
               {/** Settings */}
-              {JSON.stringify(domainList)}
 
               <div>
                 <div>
@@ -207,6 +234,8 @@ function Restaurant({ restaurant, domains }: Props) {
                           .gastrobit.de
                         </span>
                       </div>
+
+                      <button className='mt-2 btn-primary' onClick={updateSubdomain}>Speichern</button>
                     </div>
 
                     <hr className='col-span-3' />

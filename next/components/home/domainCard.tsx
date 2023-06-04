@@ -115,7 +115,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 }}
                 disabled={removing}
                 className={`${removing ? 'cursor-not-allowed bg-gray-100' : ''
-                  }btn-red`}>
+                  } btn-red w-24`}>
                 {removing ? <Loader margin={'0'} /> : 'Entfernen'}
               </button>
             </div>
@@ -243,7 +243,7 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
         </button>
       </div>
       <div className="my-3 text-left">
-        <p className="my-5 text-sm">
+        <p className="mt-5 mb-2">
           Setze den folgenden DNS-Record bei deinem DNS-Provider:
         </p>
         <div className="flex items-center justify-start p-2 space-x-10 bg-sepia-100">
@@ -261,7 +261,7 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
             <p className="text-sm font-bold">Wert</p>
             <p className="mt-2 font-mono text-sm">
               {tab == 'CNAME'
-                ? `cname.platformize.co`
+                ? `gastrobit.de`
                 : `76.76.21.21`}
             </p>
           </div>

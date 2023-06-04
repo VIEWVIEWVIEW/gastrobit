@@ -8,11 +8,15 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
 
   console.log(req.body)
 
-  if (!domain) {
-    return res.status(400).json({ error: 'domain_missing' })
+  if (!domain || typeof domain !== 'string') {
+    return res.status(400).json({ error: 'domain_invalid', message: 'Invalide Domain' })
   }
   if (!restaurantId) {
-    return res.status(400).json({ error: 'restaurant_missing', description: 'The restaurant id is missing in the query string. Use ?restaurant=1 to add a restaurant id' })
+    return res.status(400).json({ error: 'restaurant_missing', message: 'The restaurant id is missing in the query string. Use ?restaurant=1 to add a restaurant id' })
+  }
+
+  if (domain.includes('*')) {
+    return res.status(400).json({ error: 'domain_contains_wildcard', message: 'Diese Domain beinhaltet einen Wildcard-Eintrag (*). Diese sind hier nicht erlaubt.' })
   }
 
   // Create authenticated Supabase Client
@@ -33,14 +37,14 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
   const response = await addDomainToVercel(domain)
 
 
-    
+
 
   // if something went wrong, we remove the domain from vercel
   if (response.error) {
     console.error('error', response.error)
     // remove domain from vercel 
     await removeDomainFromVercel(domain)
-    return res.status(500).json({ ...response.error})
+    return res.status(500).json({ ...response.error })
   }
 
   // else, we add the domain to supabase
