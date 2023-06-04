@@ -33,17 +33,19 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
   const response = await addDomainToVercel(domain)
 
 
+    
+
   // if something went wrong, we remove the domain from vercel
   if (response.error) {
     console.error('error', response.error)
     // remove domain from vercel 
     await removeDomainFromVercel(domain)
-    return res.status(500).json({ error: response.error })
+    return res.status(500).json({ ...response.error})
   }
 
   // else, we add the domain to supabase
   const { data: supabaseResponse, error } = await supabase.from('custom_domains').insert([
-    { domain, restaurant_id: restaurantId, user_id: req.body.user_id }
+    { domain, restaurant_id: restaurantId, user_id: session.user.id }
   ])
 
   // if error on insert into supabase, we remove the domain from vercel
@@ -68,8 +70,8 @@ const removeDomainFromVercel = async (domain: string) => {
     "method": "DELETE"
   })
 
-  console.log('removeDomainFromVercel', await response.json())
-  return await response.json()
+  const json = await response.json()
+  return json
 }
 
 
@@ -87,8 +89,10 @@ const addDomainToVercel = async (domain: string) => {
     "method": "post"
   })
 
-  console.log('addDomainToVercel', await response.json())
-  return await response.json()
+  const json = await response.json()
+
+  console.log('addDomainToVercel', json)
+  return json
 }
 
 export default handler

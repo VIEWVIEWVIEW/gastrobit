@@ -47,12 +47,6 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
     revalidateOnMount: true,
     refreshInterval: 15000,
     keepPreviousData: true,
-    onSuccess: () => {
-      console.log(domainInfo)
-    },
-    onError: error => {
-      console.log(error)
-    },
   })
 
   const [removing, setRemoving] = useState(false)
@@ -103,8 +97,8 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 className={`${isValidating
                   ? 'cursor-not-allowed bg-gray-100'
                   : 'bg-white hover:text-black hover:border-black'
-                  } btn-secondary hover:bg-sentrysilver-100`}>
-                {isValidating ? <Loader /> : 'Refresh'}
+                  } btn-secondary hover:bg-sentrysilver-100 w-32`}>
+                {isValidating ? <Loader /> : 'Aktualisieren'}
               </button>
               <button
                 onClick={async (e) => {
@@ -122,7 +116,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 disabled={removing}
                 className={`${removing ? 'cursor-not-allowed bg-gray-100' : ''
                   }btn-red`}>
-                {removing ? <Loader margin={'0'} /> : 'Remove'}
+                {removing ? <Loader margin={'0'} /> : 'Entfernen'}
               </button>
             </div>
           </div>
@@ -151,10 +145,10 @@ const Configured = () => (
 )
 
 const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
-  const [recordType, setRecordType] = useState<'CNAME' | 'A'>('CNAME')
+  // We have two tabs: "CANEM" and "A" tab
+  const [tab, setTab] = useState<'CNAME' | 'A'>('CNAME')
 
   if (!domainInfo) {
-    console.error('No domain info')
     return <></>
   }
 
@@ -170,6 +164,7 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
       return <>No TXT verification</>
     }
 
+    // unverified
     return <>
       <div className='flex flex-row gap-x-2'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-black bg-yellow-400">
@@ -178,7 +173,7 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
 
         Domain muss verifiziert werden
       </div>
-      <div className='flex flex-col'>
+      <div className='flex flex-col mt-2'>
         <div className="flex items-start justify-start p-2 space-x-10 bg-sepia-100">
           <div>
             <p className="text-sm font-bold">Type</p>
@@ -196,7 +191,7 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
             </p>
           </div>
           <div>
-            <p className="text-sm font-bold">Value</p>
+            <p className="text-sm font-bold">Wert</p>
             <p className="mt-2 font-mono text-sm">
               <span className="text-ellipsis">{txtVerification.value}</span>
             </p>
@@ -204,11 +199,77 @@ const Unconfigured = ({ domainInfo }: { domainInfo?: CheckDomainAnswer }) => {
         </div>
       </div>
     </>
-
   }
 
+  // unconfigured
+  // we have two tabs here: CNAME and A (for apex domain)
   return <>
-    Unconfigured</>
+    <div className='flex flex-row gap-x-2'>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-white bg-red-500">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+
+
+      Invalide Konfiguration
+    </div>
+
+
+
+    <div className="mt-4">
+      <div className="flex justify-start space-x-4">
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            setTab('CNAME')
+          }}
+          className={`${tab == 'CNAME'
+            ? 'text-black border-black'
+            : 'text-gray-600 border-white'
+            } text-sm border-b-2 pb-1 `}
+        >
+          CNAME Record (subdomains)
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            setTab('A')
+          }}
+          className={`${tab == 'A'
+            ? 'text-black border-black'
+            : 'text-gray-600 border-white'
+            } text-sm border-b-2 pb-1 `}
+        >
+          A Record (apex domain)
+        </button>
+      </div>
+      <div className="my-3 text-left">
+        <p className="my-5 text-sm">
+          Setze den folgenden DNS-Record bei deinem DNS-Provider:
+        </p>
+        <div className="flex items-center justify-start p-2 space-x-10 bg-sepia-100">
+          <div>
+            <p className="text-sm font-bold">Typ</p>
+            <p className="mt-2 font-mono text-sm">{tab}</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold">Name</p>
+            <p className="mt-2 font-mono text-sm">
+              {tab == 'CNAME' ? 'www' : '@'}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-bold">Wert</p>
+            <p className="mt-2 font-mono text-sm">
+              {tab == 'CNAME'
+                ? `cname.platformize.co`
+                : `76.76.21.21`}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </>
+
 }
 
 

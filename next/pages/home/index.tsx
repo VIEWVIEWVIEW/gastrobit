@@ -61,12 +61,12 @@ const RestaurantList = () => {
       const { data: userData, error: userError } = await supabase.auth.getUser()
 
       if (userError) return console.log('error', userError)
-      
+
       const { data: restaurants, error } = await supabase
         .from('restaurants')
         .select()
         .order('created_at', { ascending: true })
-        .eq('user_id', userData.user?.id)
+        .eq('owner_id', userData.user?.id)
 
       if (error) console.log('error', error)
       else setRestaurants(restaurants)

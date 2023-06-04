@@ -126,11 +126,11 @@ function Restaurant({ restaurant, domains }: Props) {
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then(res => {
+      }).then(async res => {
         if (res.status === 200) {
-          resolve(res.json())
+          resolve(await res.json())
         } else {
-          reject(res.json())
+          reject(await res.json())
         }
       })
     })
@@ -143,13 +143,6 @@ function Restaurant({ restaurant, domains }: Props) {
 
     setLoading(false)
   }
-
-
-
-
-
-
-
 
 
   if (!restaurant)

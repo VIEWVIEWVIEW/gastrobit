@@ -70,7 +70,7 @@ const handler: NextApiHandler = async function (req: NextApiRequest, res) {
     verificationResponse = await verificationRes.json()
   }
 
-  console.log(domain, config, verificationResponse)
+  //console.log(domain, config, verificationResponse)
 
   if (verificationResponse && verificationResponse.verified) {
     // Domain was just verified
