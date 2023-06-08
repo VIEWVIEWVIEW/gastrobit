@@ -83,9 +83,6 @@ const addDomainToVercel = async (domain: string) => {
   const response = await fetch(`https://api.vercel.com/v10/projects/${process.env.PROJECT_ID_VERCEL}/domains`, {
     "body": JSON.stringify({
       "name": domain,
-      "gitBranch": process.env.GIT_BRANCH_FOR_DOMAINS,
-      "redirect": null,
-      "redirectStatusCode": 307
     }),
     "headers": {
       "Authorization": `Bearer ${process.env.AUTH_BEARER_TOKEN}`,

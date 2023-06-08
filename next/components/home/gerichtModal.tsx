@@ -1,11 +1,15 @@
-import { Fragment, useState } from 'react'
+/* eslint-disable react/no-unescaped-entities */
+import { Dispatch, Fragment, MouseEventHandler, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon as XIcon } from '@heroicons/react/24/outline'
 import {
   LinkIcon,
   PlusSmallIcon as PlusSmIcon,
+  XMarkIcon as XCircleIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid'
+import { Categories as Karte, Gericht } from '@/types/schema'
+import { set } from 'zod'
 
 const team = [
   {
@@ -46,21 +50,50 @@ const team = [
 ]
 
 type Props = {
-  open: boolean
-  onClose: (open: any) => void
+  show: boolean
+  setShow: (open: any) => void
+  gericht: Gericht
+  setCategories: Dispatch<Karte>
+  categories: Karte
 }
 
-export default function Example(props: Props) {
+export default function GerichtsModal(props: Props) {
   //const [open, setOpen] = useState(true)
 
-  const { open, onClose } = props
+  const { show: open = false, setShow, gericht, setCategories, categories } = props
+
+  const id = gericht.id
+
+  const [localGericht, setLocalGericht] = useState<Gericht>(gericht)
+
+  const saveGericht: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    const newCategories = [...categories]
+
+    // replace the gericht in the category with our local gericht
+    for (const category of newCategories) {
+      const index = category.gerichte.findIndex((g) => g.id === id)
+      if (index !== -1) {
+        console.log("replacing", category.gerichte[index], "with", localGericht)
+        category.gerichte[index] = localGericht
+      }
+      setCategories(newCategories)
+    }
+    setShow(false)
+  }
+
+  const abort: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    setLocalGericht(gericht)
+    setShow(false)
+  }
 
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as='div'
         className='fixed inset-0 overflow-hidden'
-        onClose={onClose}>
+        onClose={setShow}>
         <div className='absolute inset-0 overflow-hidden'>
           <Dialog.Overlay className='absolute inset-0' />
 
@@ -76,26 +109,24 @@ export default function Example(props: Props) {
               <div className='w-screen max-w-md pointer-events-auto'>
                 <form className='flex flex-col h-full bg-white divide-y divide-gray-200 shadow-xl'>
                   <div className='flex-1 h-0 overflow-y-auto'>
-                    <div className='px-4 py-6 bg-indigo-700 sm:px-6'>
+                    <div className='px-4 py-6 bg-taubmanspurple-700 sm:px-6'>
                       <div className='flex items-center justify-between'>
                         <Dialog.Title className='text-lg font-medium text-white'>
-                          {' '}
-                          New Project{' '}
+                          {props.gericht.ueberschrift}
                         </Dialog.Title>
                         <div className='flex items-center ml-3 h-7'>
                           <button
                             type='button'
-                            className='text-indigo-200 bg-indigo-700 rounded-md hover:text-white focus:outline-none focus:ring-2 focus:ring-white'
-                            onClick={onClose}>
-                            <span className='sr-only'>Close panel</span>
+                            className='text-white hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-white'
+                            onClick={() => setShow(false)}
+                          >
                             <XIcon className='w-6 h-6' aria-hidden='true' />
                           </button>
                         </div>
                       </div>
                       <div className='mt-1'>
-                        <p className='text-sm text-indigo-300'>
-                          Get started by filling in the information below to
-                          create your new project.
+                        <p className='text-sm text-gray-100'>
+                          Hier kannst du die Daten des Gerichts ändern. Oben ist der ursprüngliche Name des Gerichtes, damit du nicht ausversehen ein falsches Gericht editierst.
                         </p>
                       </div>
                     </div>
@@ -104,66 +135,89 @@ export default function Example(props: Props) {
                         <div className='pt-6 pb-5 space-y-6'>
                           <div>
                             <label
-                              htmlFor='project-name'
                               className='block text-sm font-medium text-gray-900'>
-                              {' '}
-                              Project name{' '}
+                              Überschrift (z.B. "Pizza Prosciutto")
                             </label>
                             <div className='mt-1'>
                               <input
                                 type='text'
-                                name='project-name'
-                                id='project-name'
-                                className='block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                className='w-full input'
+                                value={localGericht.ueberschrift}
+                                onChange={e => setLocalGericht({ ...localGericht, ueberschrift: e.target.value })}
                               />
                             </div>
                           </div>
                           <div>
                             <label
-                              htmlFor='description'
+
                               className='block text-sm font-medium text-gray-900'>
-                              {' '}
-                              Description{' '}
+                              Unterschrift
                             </label>
                             <div className='mt-1'>
                               <textarea
-                                id='description'
-                                name='description'
-                                rows={4}
-                                className='block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                                defaultValue={''}
+                                rows={2}
+                                className='block w-full input'
+                                value={localGericht.unterschrift}
+                                onChange={e => setLocalGericht({ ...localGericht, unterschrift: e.target.value })}
+                                placeholder='mit Eisbergsalat, Tomaten, Gurken und Mais'
                               />
                             </div>
                           </div>
+
                           <div>
                             <h3 className='text-sm font-medium text-gray-900'>
-                              Team Members
+                              Preise
                             </h3>
                             <div className='mt-2'>
-                              <div className='flex space-x-2'>
-                                {team.map(person => (
-                                  <a
-                                    key={person.email}
-                                    href={person.href}
-                                    className='rounded-full hover:opacity-75'>
-                                    <img
-                                      className='inline-block w-8 h-8 rounded-full'
-                                      src={person.imageUrl}
-                                      alt={person.name}
+                              <div className='flex flex-col space-y-2'>
+                                {localGericht.preise.map((preis, index) => (
+                                  <div
+                                    key={index}
+
+                                    className='flex flex-row space-x-3'>
+                                    {/* Input for "klein", "mittel", "groß" etc */}
+                                    <input type='text' className='flex-grow input' value={preis.name} onChange={e => {
+                                      const newPreise = [...localGericht.preise]
+                                      newPreise[index].name = e.target.value
+                                      setLocalGericht({ ...localGericht, preise: newPreise })
+                                    }} />
+
+                                    {/* Input for the price */}
+                                    <input
+                                      type='number'
+                                      className='w-1/4 input'
+                                      step="any"
+                                      value={preis.preis}
+                                      onChange={e => {
+                                        const newPreise = [...localGericht.preise]
+                                        newPreise[index].preis = parseFloat(e.target.value)
+                                        setLocalGericht({ ...localGericht, preise: newPreise })
+                                      }}
                                     />
-                                  </a>
+
+                                    {/* Button to remove the price */}
+                                    <XCircleIcon className="h-10 cursor-pointer"
+                                      onClick={(e) => {
+                                        const newPreise = [...localGericht.preise]
+                                        newPreise.splice(index, 1)
+                                        setLocalGericht({ ...localGericht, preise: newPreise })
+                                      }}
+                                    />
+
+                                  </div>
                                 ))}
-                                <button
-                                  type='button'
-                                  className='inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-gray-400 bg-white border-2 border-gray-200 border-dashed rounded-full hover:border-gray-300 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>
-                                  <span className='sr-only'>
-                                    Add team member
-                                  </span>
-                                  <PlusSmIcon
-                                    className='w-5 h-5'
-                                    aria-hidden='true'
-                                  />
-                                </button>
+
+
+                                {/* Button to add a new price */}
+                                <PlusSmIcon
+                                  className='w-8 h-8 cursor-pointer'
+                                  aria-hidden='true'
+                                  onClick={() => {
+                                    const newPreise = [...localGericht.preise]
+                                    newPreise.push({ name: "klein", preis: 10.00 })
+                                    setLocalGericht({ ...localGericht, preise: newPreise })
+                                  }}
+                                />
                               </div>
                             </div>
                           </div>
@@ -187,8 +241,8 @@ export default function Example(props: Props) {
                                   <label
                                     htmlFor='privacy-public'
                                     className='font-medium text-gray-900'>
-                                    {' '}
-                                    Public access{' '}
+
+                                    Public access
                                   </label>
                                   <p
                                     id='privacy-public-description'
@@ -213,8 +267,8 @@ export default function Example(props: Props) {
                                     <label
                                       htmlFor='privacy-private-to-project'
                                       className='font-medium text-gray-900'>
-                                      {' '}
-                                      Private to project members{' '}
+
+                                      Private to project members
                                     </label>
                                     <p
                                       id='privacy-private-to-project-description'
@@ -240,8 +294,8 @@ export default function Example(props: Props) {
                                     <label
                                       htmlFor='privacy-private'
                                       className='font-medium text-gray-900'>
-                                      {' '}
-                                      Private to you{' '}
+
+                                      Private to you
                                     </label>
                                     <p
                                       id='privacy-private-description'
@@ -276,8 +330,7 @@ export default function Example(props: Props) {
                                 aria-hidden='true'
                               />
                               <span className='ml-2'>
-                                {' '}
-                                Learn more about sharing{' '}
+                                Learn more about sharing
                               </span>
                             </a>
                           </div>
@@ -288,14 +341,16 @@ export default function Example(props: Props) {
                   <div className='flex justify-end flex-shrink-0 px-4 py-4'>
                     <button
                       type='button'
-                      className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                      onClick={() => onClose(false)}>
-                      Cancel
+                      className='mr-2 btn-secondary'
+                      onClick={abort}>
+                      Abbrechen
                     </button>
                     <button
                       type='submit'
-                      className='inline-flex justify-center px-4 py-2 ml-4 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>
-                      Save
+                      className='btn-primary'
+                      onClick={saveGericht}
+                    >
+                      Ändern
                     </button>
                   </div>
                 </form>

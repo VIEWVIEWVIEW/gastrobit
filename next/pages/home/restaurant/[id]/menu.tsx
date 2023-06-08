@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layouts/MainLayout'
-import React, { Dispatch, DragEventHandler, useCallback, useState } from 'react'
+import React, { Dispatch, DragEventHandler, useCallback, useEffect, useState } from 'react'
 import { z } from 'zod'
 type Props = {
   restaurant: Restaurant
@@ -117,6 +117,8 @@ import {
   Category,
   categories,
   Karte,
+  Extras,
+  extras,
 } from '../../../../types/schema'
 
 const DragIcon = (props: any) => (
@@ -187,6 +189,22 @@ const Item = ({
     if (!open) setOpen(true)
   }
 
+  const deleteGericht = () => {
+    const newCategories = [...categories]
+
+    for (const category of newCategories) {
+      const index = category.gerichte.findIndex(c => c.id === id)
+
+      console.log("index", index)
+      if (index !== -1) {
+        category.gerichte.splice(index, 1)
+      }
+      setCategories(newCategories)
+    }
+  }
+
+
+
   return (
     <div
       ref={setNodeRef}
@@ -198,16 +216,18 @@ const Item = ({
           <div key={item.id} className='flex flex-col my-5'>
             <h3 className='text-xl'>{item.ueberschrift}</h3>
             <p>{item.unterschrift}</p>
+            {item.preise.map((preis, index) => <div key={index}>{preis.name}: {preis.preis}</div>)}
           </div>
         </div>
 
         <div className='flex flex-row'>
           <div onClick={openModal}>
             <PencilIcon />
-            <GerichtModal open={open} onClose={setOpen} />
+            <GerichtModal show={open} setShow={setOpen} gericht={item} setCategories={setCategories} categories={categories} />
           </div>
 
           <DragIcon {...listeners} />
+          <XMarkIcon className='w-6 h-6 cursor-pointer' onClick={deleteGericht} />
         </div>
       </div>
     </div>
@@ -215,6 +235,9 @@ const Item = ({
 }
 
 import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers'
+import { XMarkIcon } from '@heroicons/react/24/outline'
+import { PlusCircleIcon } from '@heroicons/react/24/outline'
+import PresetModal from '@/components/home/presetModal'
 
 const SortableCategory = ({
   category,
@@ -223,7 +246,7 @@ const SortableCategory = ({
 }: {
   category: Category
   categories: Category[]
-  setCategories: any
+  setCategories: Dispatch<Karte>
 }) => {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 
@@ -272,7 +295,52 @@ const SortableCategory = ({
           </>
         ) : null}
 
-        <h2 className='m-5 text-4xl'>{category.name}</h2>
+        <h2 className='flex flex-row items-center justify-center w-full m-5 text-4xl '>
+          <div>
+            {category.name}
+          </div>
+
+          {/* Add new gericht button */}
+          <div>
+
+            <PlusCircleIcon className='ml-2 text-white border-white cursor-pointer p-0.5 hover:text-gray-200 bg-taubmanspurple-500 h-9 w-9 ' onClick={() => {
+              const neuesGericht: Gericht = {
+                id: self.crypto.randomUUID(),
+                ueberschrift: 'Neue Pizza Tuna',
+                unterschrift: 'mit Thunfisch und Rucola',
+                preise: [
+                  {
+                    name: 'klein (18cm)',
+                    preis: 7.5,
+                  },
+                  {
+                    name: 'mittel (23cm)',
+                    preis: 8.5,
+                  },
+                  {
+                    name: 'groß (27cm)',
+                    preis: 9.5,
+                  }
+                ],
+              }
+
+              const categoryCopy = { ...category }
+
+              // add gericht to category
+              categoryCopy.gerichte.push(neuesGericht)
+
+              // find index of current category
+              const currentCategory = categories.findIndex(c => c.id === category.id)
+
+              // clone categories and replace the category
+              const newCategories = [...categories]
+              newCategories[currentCategory] = categoryCopy
+
+              setCategories(newCategories)
+
+            }} />
+          </div>
+        </h2>
 
         <div className='w-full'>
           <DndContext
@@ -306,6 +374,7 @@ const SortableCategory = ({
 }
 
 const Menu = (props: Props) => {
+  const { restaurant } = props
   const [categoriesState, setCategoriesState] = useState<Karte>(
     // @ts-expect-error Fuck typescript
     props.restaurant.karte ?? testkarte,
@@ -346,7 +415,6 @@ const Menu = (props: Props) => {
     console.log(data, error)
   }
 
-  const a = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
 
   return (
     <MainLayout>
@@ -372,14 +440,7 @@ const Menu = (props: Props) => {
             <div>
               <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
             </div>
-            {a.map((item, index) => (
-              <div
-                className='flex flex-row justify-between w-full py-14 bg-sepia-400'
-                key={index}>
-                {item}
-                <PencilIcon />
-              </div>
-            ))}
+            {restaurant.extra_presets ? <RestaurantExtraPresets presets={restaurant.extra_presets} /> : null}
 
             <button onClick={saveToSupabase} className='h-12 btn-secondary'>
               Speichern
@@ -389,6 +450,19 @@ const Menu = (props: Props) => {
       </div>
     </MainLayout>
   )
+}
+
+const RestaurantExtraPresets = ({ presets }: { presets: Extras }) => {
+  // exit guards
+
+  if (!presets.length) return <></>
+
+
+
+  return <>
+    {JSON.stringify(presets) + 'a'}
+    <PresetModal />
+  </>
 }
 
 export default Menu
