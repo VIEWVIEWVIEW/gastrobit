@@ -31,6 +31,20 @@ export interface Database {
           restaurant_id?: number
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "custom_domains_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_domains_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       restaurants: {
         Row: {
@@ -63,6 +77,14 @@ export interface Database {
           owner_id?: string
           subdomain?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_owner_id_fkey"
+            columns: ["owner_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

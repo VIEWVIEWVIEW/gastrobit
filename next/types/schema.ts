@@ -1,11 +1,11 @@
 import { z } from 'zod'
 
-const extra = z.object({
+export const extra = z.object({
   name: z.string(),
   preis: z.number(),
 })
 
-const extras = z.array(
+export const extras = z.array(
   z.object({
     name: z.string({
       description: "Der Name des der Extrakategorie, z.B. 'Ihr Salatdressing'",
@@ -15,7 +15,7 @@ const extras = z.array(
         "Der Typ der Extrakategorie, z.B. 'oneOf', wenn nur eine Option ausgewählt werden kann",
     }),
     items: z.array(extra, {
-      description: 'Die verfügbarer Extras für ein Gericht',
+      description: 'Die verfügbaren Extras für ein Gericht',
     }),
   }),
 )
@@ -23,11 +23,11 @@ const extras = z.array(
 const preis = z.object({
   name: z.string({
     description:
-      "Der Name des Preises, z.B. 'klein (18cm)', 'mittel', 'groß (30cm)'",
+    "Der Name des Preises, z.B. 'klein (18cm)', 'mittel', 'groß (30cm)'",
   }),
   preis: z.number({
     description:
-      'Der Preis in Euro des Gerichts für die angegebene Größe, z.B. 5.5',
+    'Der Preis in Euro des Gerichts für die angegebene Größe, z.B. 5.5',
   }),
 })
 
@@ -55,3 +55,6 @@ export type Categories = z.infer<typeof categories>
 export type Gericht = z.infer<typeof gericht>
 export type Category = z.infer<typeof category>
 export type Karte = z.infer<typeof karte>
+
+export type Extra = z.infer<typeof extra>
+export type Extras = z.infer<typeof extras>

@@ -375,6 +375,7 @@ const SortableCategory = ({
 
 const Menu = (props: Props) => {
   const { restaurant } = props
+  const [openPresetModal, setOpenPresetModal] = useState(false)
   const [categoriesState, setCategoriesState] = useState<Karte>(
     // @ts-expect-error Fuck typescript
     props.restaurant.karte ?? testkarte,
@@ -440,12 +441,24 @@ const Menu = (props: Props) => {
             <div>
               <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
             </div>
-            {restaurant.extra_presets ? <RestaurantExtraPresets presets={restaurant.extra_presets} /> : null}
+            {restaurant.extra_presets ? <RestaurantExtraPresets presets={restaurant.extra_presets as Extras} /> : null}
 
-            <button onClick={saveToSupabase} className='h-12 btn-secondary'>
-              Speichern
+            <button className='flex flex-row content-center cursor-pointer btn-primary'
+              onClick={() => setOpenPresetModal(true)}>
+              <div>
+                Preset hinzufügen
+              </div>
+              <PlusCircleIcon className='text-white   p-0.5 hover:text-gray-200 h-7 w-7 ' />
+              {openPresetModal ? <PresetModal show={openPresetModal} setShow={setOpenPresetModal} /> : null}
             </button>
+
+
+
+
           </div>
+          <button onClick={saveToSupabase} className='h-12 mt-5 btn-secondary'>
+            Speichern
+          </button>
         </div>
       </div>
     </MainLayout>
@@ -461,7 +474,7 @@ const RestaurantExtraPresets = ({ presets }: { presets: Extras }) => {
 
   return <>
     {JSON.stringify(presets) + 'a'}
-    <PresetModal />
+
   </>
 }
 

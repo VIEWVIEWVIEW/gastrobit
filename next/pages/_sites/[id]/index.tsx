@@ -56,9 +56,8 @@ function Page(props: PageProps) {
 
   return (
     <RestaurantLayout theme={'retro'}>
-      Index {router.route} {}{' '}
       <div className='container mx-auto'>
-        <Karte karte={props.restaurant.karte as Karte} />
+        {props.restaurant.karte ? <Karte karte={props.restaurant.karte as Karte} /> : "Keine Karte vorhanden. Bitte erstellen Sie eine auf Gastrobit.de"}
       </div>
     </RestaurantLayout>
   )

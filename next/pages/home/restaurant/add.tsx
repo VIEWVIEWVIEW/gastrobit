@@ -1,5 +1,6 @@
 import MainLayout from '@/components/layouts/MainLayout'
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React from 'react'
 
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -12,8 +13,27 @@ type Inputs = {
 };
 
 const AddRestaurant = (props: Props) => {
+  const router = useRouter()
   const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = data => console.log(data, "a");
+  const onSubmit: SubmitHandler<Inputs> = async data => {
+    const regData = {
+      business_type: data.businessType,
+      business_name: data.restaurantName,
+    }
+
+    const res = await fetch('/api/stripe/create-express-account', {
+      method: 'POST',
+      body: JSON.stringify(regData),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin'
+    })
+
+    const json = await res.json()
+
+    router.push(json.url)
+  };
 
   return (
     <MainLayout>
@@ -59,7 +79,7 @@ const AddRestaurant = (props: Props) => {
 
                       >
                         <option value="company">Unternehmen</option>
-                        <option value="individuum">Individuum</option>
+                        <option value="individual">Individuum</option>
                         <option value="non_profit">Non-Profit</option>
                       </select>
                     </div>
