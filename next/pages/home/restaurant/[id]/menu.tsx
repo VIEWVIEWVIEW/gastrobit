@@ -119,6 +119,7 @@ import {
   Karte,
   Extras,
   extras,
+  Extra,
 } from '../../../../types/schema'
 
 const DragIcon = (props: any) => (
@@ -381,6 +382,9 @@ const Menu = (props: Props) => {
     props.restaurant.karte ?? testkarte,
   )
 
+  const [presets, setPresets] = useState<Extras>(props.restaurant.extra_presets as Extras)
+
+  // @TODO just debug function, delete me later
   const addPizza = () => {
     const newPizza: Gericht = {
       id: 'AAAAAAAAAAAA',
@@ -401,7 +405,7 @@ const Menu = (props: Props) => {
 
   const supabase = useSupabaseClient<Database>()
 
-  const saveToSupabase = async () => {
+  const saveCategoriesAndGerichteToSupabase = async () => {
     // validate "categories" with schema "category"
     categories.parse(categoriesState)
     console.debug('parsed successfully')
@@ -441,7 +445,7 @@ const Menu = (props: Props) => {
             <div>
               <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
             </div>
-            {restaurant.extra_presets ? <RestaurantExtraPresets presets={restaurant.extra_presets as Extras} /> : null}
+            {restaurant.extra_presets ? <RestaurantExtraPresets presets={presets as Extras} setPresets={setPresets} /> : null}
 
             <button className='flex flex-row content-center cursor-pointer btn-primary'
               onClick={() => setOpenPresetModal(true)}>
@@ -449,14 +453,17 @@ const Menu = (props: Props) => {
                 Preset hinzufügen
               </div>
               <PlusCircleIcon className='text-white   p-0.5 hover:text-gray-200 h-7 w-7 ' />
-              {openPresetModal ? <PresetModal show={openPresetModal} setShow={setOpenPresetModal} /> : null}
+              {openPresetModal ?
+                <PresetModal show={openPresetModal} setShow={setOpenPresetModal} presets={presets} setPresets={setPresets} />
+                : null
+              }
             </button>
 
 
 
 
           </div>
-          <button onClick={saveToSupabase} className='h-12 mt-5 btn-secondary'>
+          <button onClick={saveCategoriesAndGerichteToSupabase} className='h-12 mt-5 btn-secondary'>
             Speichern
           </button>
         </div>
@@ -465,7 +472,7 @@ const Menu = (props: Props) => {
   )
 }
 
-const RestaurantExtraPresets = ({ presets }: { presets: Extras }) => {
+const RestaurantExtraPresets = ({ presets, setPresets }: { presets: Extras, setPresets: Dispatch<Extras> }) => {
   // exit guards
 
   if (!presets.length) return <></>
@@ -473,8 +480,58 @@ const RestaurantExtraPresets = ({ presets }: { presets: Extras }) => {
 
 
   return <>
-    {JSON.stringify(presets) + 'a'}
+    {presets.map((preset, index) => (
+      <div key={index} className='flex flex-col items-center w-full my-2'>
+        <RestaurantExtraPreset preset={preset} index={index} setPresets={setPresets} presets={presets} />
+      </div>
+    ))}
+  </>
+}
 
+const RestaurantExtraPreset = ({ preset, index, setPresets, presets }: {
+  preset: { items: Extra[], name: string, typ: 'oneOf' | 'manyOf' },
+  index: number,
+  setPresets: Dispatch<Extras>,
+  presets: Extras
+}) => {
+  const [openEditModal, setOpenEditModal] = useState(false)
+
+  const deleteCurrentPreset = () => {
+    const newPresets = [...presets]
+    newPresets.splice(index, 1)
+    setPresets(newPresets)
+  }
+
+  return <>
+    {openEditModal ?
+      <PresetModal show={openEditModal} setShow={setOpenEditModal} presets={presets} setPresets={setPresets} preset={preset} index={index} />
+      : null
+    }
+    <div className="flex flex-row w-full p-2 bg-white">
+      {/* left side */}
+      <div className='flex flex-col justify-between'>
+        <h2>Name: {preset.name}</h2>
+        <p className='flex flex-row'>
+          Typ: {preset.typ === 'oneOf' ? 'Einzelauswahl' : 'Mehrfachauswahl'}
+        </p>
+        <p>
+          Anzahl Extras: {preset.items.length}
+        </p>
+
+      </div>
+
+      {/* right side */}
+      <div className='flex flex-col items-end flex-grow space-y-3 '>
+
+        <XMarkIcon className='w-6 h-6 cursor-pointer' onClick={deleteCurrentPreset} />
+
+        <button className='w-25 btn-secondary'
+          onClick={e => {
+            e.preventDefault()
+            setOpenEditModal(true)
+          }}>Bearbeiten</button>
+      </div>
+    </div>
   </>
 }
 
