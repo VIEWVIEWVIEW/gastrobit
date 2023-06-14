@@ -37,7 +37,7 @@ export const gericht = z.object({
   unterschrift: z.string(),
   preise: z.array(preis, {
     description: 'Die verfügbaren Größen und Preise für das Gericht',
-  }),
+  }).min(1),
   extras: extras.optional(),
 })
 

@@ -69,6 +69,13 @@ export default function GerichtsModal(props: Props) {
 
   const saveGericht: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault()
+    // if we have less than 1 price, we have to alert the user
+    if (localGericht.preise.length < 1) {
+      alert("Sie müssen mindestens einen Preis angeben")
+      return
+    }
+
+
     const newCategories = [...categories]
 
     // replace the gericht in the category with our local gericht

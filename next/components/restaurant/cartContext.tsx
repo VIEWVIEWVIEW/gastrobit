@@ -1,38 +1,38 @@
-// write a new react hook which provides the cart context.
-// The card will be stored in the local storage.
-// The card contains Items
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-
-
-const readInitialStateFromLocalStorage = () => {
-  if (typeof window === 'undefined') return []
-
-  const data = localStorage.getItem('cart') || '[]'
-  return JSON.parse(data)
+type Gericht = {
+  id: string | number;
+  name: string;
+  variante: string;
+  preis: number;
+  extras: {
+    name: string;
+    typ: "oneOf" | "manyOf";
+    items: {
+      name: string;
+      preis: number;
+    }[];
+  }[];
 }
 
-const CartContext = createContext(readInitialStateFromLocalStorage())
+interface CartState {
+  gerichte: Gericht[];
+  addGericht: (gericht: Gericht) => void;
+  popIndex: (index: number) => void;
+}
 
-
-
-export const CartProvider = ({ children }: { children: JSX.Element }) => {
-  const [cart, setCart] = useState(readInitialStateFromLocalStorage())
-
-  useEffect(() => {
-    const data = readInitialStateFromLocalStorage()
-    setCart(data)
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart))
-  }, [cart])
-
-  return (
-    <CartContext.Provider value={{ cart, setCart }}>
-      {children}
-    </CartContext.Provider>
+const useCart = create<CartState>()(
+  persist(
+    (set) => ({
+      gerichte: [],
+      addGericht: gericht => set(oldState => ({ gerichte: [...oldState.gerichte, gericht] })),
+      popIndex: index => set(oldState => ({ gerichte: oldState.gerichte.filter((_, i) => i !== index) }))
+    }),
+    {
+      name: 'cart', // unique name
+    }
   )
-}
+)
 
-export const useCart = () => useContext(CartContext)
+export default useCart

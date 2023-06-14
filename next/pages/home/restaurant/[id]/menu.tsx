@@ -369,7 +369,7 @@ const SortableCategory = ({
             {...getRootProps()}
           >
             <div className='absolute flex-row items-center justify-center w-full h-full '>
-              <MoonLoader loading={uploading} />
+              <MoonLoader loading={uploading} className='bg-white bg-opacity-75 rounded-full' />
             </div>
             <div className='absolute w-full h-full'>
               <div className='flex-row items-center justify-center hidden w-full h-full bg-white cursor-pointer bg-opacity-70 group-hover:flex'>
