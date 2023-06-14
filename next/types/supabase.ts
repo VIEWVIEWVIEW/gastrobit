@@ -55,7 +55,9 @@ export interface Database {
           karte: Json | null
           name: string
           owner_id: string
+          stripe_account_id: string | null
           subdomain: string | null
+          theme: string
         }
         Insert: {
           created_at?: string | null
@@ -65,7 +67,9 @@ export interface Database {
           karte?: Json | null
           name: string
           owner_id: string
+          stripe_account_id?: string | null
           subdomain?: string | null
+          theme?: string
         }
         Update: {
           created_at?: string | null
@@ -75,7 +79,9 @@ export interface Database {
           karte?: Json | null
           name?: string
           owner_id?: string
+          stripe_account_id?: string | null
           subdomain?: string | null
+          theme?: string
         }
         Relationships: [
           {

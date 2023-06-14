@@ -150,7 +150,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
                         </Link>
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                        Umsätze
+                        <a href={`/api/stripe/get-login-link?restaurantId=${restaurant.id}`}>Umsätze</a>
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
                         <Link
