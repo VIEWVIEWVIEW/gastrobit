@@ -19,7 +19,8 @@ type PageProps = {
   restaurant: Restaurant
 }
 
-import { Category, Karte } from "@/types/schema"
+import { Category, Gericht, Karte } from "@/types/schema"
+import { Fragment } from 'react'
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
   /**
@@ -55,7 +56,7 @@ function Page(props: PageProps) {
   const router = useRouter()
 
   return (
-    <RestaurantLayout theme={'retro'}>
+    <RestaurantLayout theme={'corporate'}>
       <div className='container mx-auto'>
         {props.restaurant.karte ? <Karte karte={props.restaurant.karte as Karte} /> : "Keine Karte vorhanden. Bitte erstellen Sie eine auf Gastrobit.de"}
       </div>
@@ -69,8 +70,21 @@ function Kategorie({ category }: { category: Category }) {
       <h2 className='text-xl font-semibold'>{category.name}</h2>
       <div>
         {category.gerichte.map(gericht => (
-          <div key={gericht.id}>{gericht.ueberschrift}</div>
+          <Fragment key={gericht.id}>
+            <GerichtRow gericht={gericht} />
+          </Fragment>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function GerichtRow({ gericht }: { gericht: Gericht }) {
+  return (
+    <div className='flex flex-row justify-between'>
+      <div className='flex flex-col'>
+        <h3 className='text-lg font-semibold'>{gericht.ueberschrift}</h3>
+        <p className='text-sm'>{gericht.unterschrift}</p>
       </div>
     </div>
   )

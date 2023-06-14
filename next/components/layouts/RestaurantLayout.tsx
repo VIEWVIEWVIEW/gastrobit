@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { GetServerSideProps } from 'next'
 import React from 'react'
+import { Navbar } from '../restaurant/navbar'
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
   ctx.res.setHeader(
@@ -31,10 +32,13 @@ function RestaurantLayout({
 }) {
   return (
     <>
-      <div
-        className='flex flex-col justify-between min-h-screen '
-        data-theme={theme}>
-        <div>{children}</div>
+      <div data-theme={theme}>
+        <Navbar restaurantName='Restaurant' />
+
+        <div
+          className='flex flex-col justify-between min-h-screen '>
+          <div>{children}</div>
+        </div>
       </div>
     </>
   )
