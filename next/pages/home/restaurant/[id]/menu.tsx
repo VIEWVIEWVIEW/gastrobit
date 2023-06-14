@@ -162,11 +162,13 @@ const Item = ({
   id,
   categories,
   setCategories,
+  presets
 }: {
   item: Gericht
   id: any
   categories: Categories
   setCategories: Dispatch<Categories>
+  presets: Extras
 }) => {
   const {
     attributes,
@@ -224,7 +226,7 @@ const Item = ({
         <div className='flex flex-row'>
           <div onClick={openModal}>
             <PencilIcon />
-            <GerichtModal show={open} setShow={setOpen} gericht={item} setCategories={setCategories} categories={categories} />
+            <GerichtModal show={open} setShow={setOpen} gericht={item} setCategories={setCategories} categories={categories} presets={presets} />
           </div>
 
           <DragIcon {...listeners} />
@@ -239,17 +241,26 @@ import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifi
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import PresetModal from '@/components/home/presetModal'
+import { toast } from 'react-hot-toast'
+import { router } from 'websocket'
+import { useRouter } from 'next/router'
+import { FileWithPath, useDropzone } from 'react-dropzone'
+import { MoonLoader } from 'react-spinners'
 
 const SortableCategory = ({
   category,
   categories,
   setCategories,
+  presets
 }: {
   category: Category
   categories: Category[]
   setCategories: Dispatch<Karte>
+  presets: Extras
 }) => {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
+
+  const [uploading, setUploading] = useState(false)
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id)
@@ -280,6 +291,67 @@ const SortableCategory = ({
     setActiveId(null)
   }
 
+
+  const supabase = useSupabaseClient<Database>()
+  // get id from router
+  const router = useRouter()
+  const { id: restaurantId } = router.query
+
+  const uploadImageToSupabase = useCallback(async (userId: string, image: unknown) => {
+    console.debug('uploading image to supabase')
+    const { data, error } = await supabase.storage
+      .from('restaurant_assets')
+      .upload(`${userId}/${restaurantId}/category-${category.id}`, image as any, {
+        upsert: true,
+        cacheControl: "3600",
+      })
+    console.log(data, error)
+  }, [category.id, restaurantId, supabase.storage])
+
+  const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
+    setUploading(true)
+    // Do something with the files
+    const fileReader = new FileReader()
+    fileReader.readAsArrayBuffer(acceptedFiles[0])
+
+    fileReader.onload = async e => {
+      const { data: user } = await supabase.auth.getUser()
+      const userId = user?.user?.id
+      if (!userId) {
+        console.error('Sie müssen eingeloggt sein, um Bilder hochladen zu können')
+        return
+      }
+      await uploadImageToSupabase(userId, acceptedFiles[0])
+
+
+      // get public url
+
+      const { data } = supabase
+        .storage
+        .from('restaurant_assets')
+        .getPublicUrl(`${userId}/${restaurantId}/category-${category.id}`)
+
+      // update category headerUrl
+      const newCategories = [...categories]
+      const currentCategory = newCategories.findIndex(c => c.id === category.id)
+      newCategories[currentCategory].headerUrl = `${data.publicUrl}?cache=${Date.now().toString()}`
+      setCategories(newCategories)
+      toast.success('Bild erfolgreich geändert')
+      setUploading(false)
+    }
+
+  }, [categories, category.id, restaurantId, setCategories, supabase.auth, supabase.storage, uploadImageToSupabase])
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'image/png': ['.png'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp'],
+    },
+    maxFiles: 1,
+    onDrop
+  })
+
   // used for dragoverlay
   const currentItem = activeId
     ? category.gerichte.find(c => c.id === activeId)
@@ -288,22 +360,75 @@ const SortableCategory = ({
   return (
     <>
       <div className='flex flex-col items-center w-full'>
-        {category.headerUrl ? (
-          <>
-            <div
-              className='w-full h-40 bg-center bg-cover'
-              style={{ backgroundImage: `url(${category.headerUrl})` }}></div>
-          </>
-        ) : null}
+        {/* Header image */}
+
+        <>
+          <div
+            className='relative w-full h-40 bg-center bg-cover group '
+            style={{ backgroundImage: `url(${category.headerUrl ?? 'https://placehold.co/1337x420'})` }}
+            {...getRootProps()}
+          >
+            <div className='absolute flex-row items-center justify-center w-full h-full '>
+              <MoonLoader loading={uploading} />
+            </div>
+            <div className='absolute w-full h-full'>
+              <div className='flex-row items-center justify-center hidden w-full h-full bg-white cursor-pointer bg-opacity-70 group-hover:flex'>
+                Bild per Drag & Drop hochladen, oder klicken um eines auszuwählen
+              </div>
+            </div>
+            <input {...getInputProps()} />
+          </div>
+        </>
+
+
+
 
         <h2 className='flex flex-row items-center justify-center w-full m-5 text-4xl '>
+          {/* move up and down */}
+          <div className='flex flex-row mr-5 gap-x-2 '>
+            <svg
+              onClick={e => {
+                // find index of current category
+                const currentCategory = categories.findIndex(c => c.id === category.id)
+                // move it up by one index
+                const newCategories = [...categories]
+                const temp = newCategories[currentCategory]
+                newCategories[currentCategory] = newCategories[currentCategory - 1]
+                newCategories[currentCategory - 1] = temp
+                setCategories(newCategories)
+
+              }}
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 cursor-pointer hover:text-gray-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" />
+            </svg>
+
+            <svg
+              onClick={e => {
+                // find index of current category
+                const currentCategory = categories.findIndex(c => c.id === category.id)
+                // move it down by one index
+                const newCategories = [...categories]
+                const temp = newCategories[currentCategory]
+                newCategories[currentCategory] = newCategories[currentCategory + 1]
+                newCategories[currentCategory + 1] = temp
+                setCategories(newCategories)
+
+              }}
+
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 cursor-pointer hover:text-gray-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" />
+            </svg>
+
+
+          </div>
+
+
           <div>
             {category.name}
           </div>
 
           {/* Add new gericht button */}
           <div>
-
             <PlusCircleIcon className='ml-2 text-white border-white cursor-pointer p-0.5 hover:text-gray-200 bg-taubmanspurple-500 h-9 w-9 ' onClick={() => {
               const neuesGericht: Gericht = {
                 id: self.crypto.randomUUID(),
@@ -354,6 +479,7 @@ const SortableCategory = ({
               <div className='w-full space-y-2'>
                 {category.gerichte.map((item, index) => (
                   <Item
+                    presets={presets}
                     key={item.id}
                     id={item.id}
                     item={item}
@@ -369,7 +495,7 @@ const SortableCategory = ({
           */}
           </DndContext>
         </div>
-      </div>
+      </div >
     </>
   )
 }
@@ -405,19 +531,46 @@ const Menu = (props: Props) => {
 
   const supabase = useSupabaseClient<Database>()
 
-  const saveCategoriesAndGerichteToSupabase = async () => {
+  const saveCategoriesAndGerichteAndPresetsToSupabase = async () => {
     // validate "categories" with schema "category"
     categories.parse(categoriesState)
-    console.debug('parsed successfully')
+    extras.parse(presets)
 
-    const { data, error } = await supabase
-      .from('restaurants')
-      .update({
-        karte: categoriesState,
-      })
-      .eq('id', props.params.id)
+    // Speisekarte speichern
+    {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .update({
+          karte: categoriesState,
+        })
+        .eq('id', props.params.id)
 
-    console.log(data, error)
+      if (!error) {
+        toast.success('Speisekarte erfolgreich gespeichert')
+      }
+    }
+
+    // Extra presets speichern
+    {
+      const { data, error } = await supabase.from('restaurants').update({
+        extra_presets: presets,
+      }).eq('id', props.params.id)
+
+      if (!error) {
+        toast.success('Extra Presets erfolgreich gespeichert')
+      }
+    }
+  }
+
+  const addNewCategory = () => {
+    const newCategories = [...categoriesState]
+    const newCategory: Category = {
+      id: self.crypto.randomUUID(),
+      name: 'Neue Kategorie',
+      gerichte: [],
+    }
+    newCategories.push(newCategory)
+    setCategoriesState(newCategories)
   }
 
 
@@ -431,6 +584,7 @@ const Menu = (props: Props) => {
             <div className='w-full p-2 space-y-36 bg-sepia-400'>
               {categoriesState.map((category, index) => (
                 <SortableCategory
+                  presets={presets}
                   key={category.id}
                   category={category}
                   categories={categoriesState}
@@ -445,7 +599,7 @@ const Menu = (props: Props) => {
             <div>
               <h1 className='mt-12 mb-8 text-3xl'>Presets für Extras</h1>
             </div>
-            {restaurant.extra_presets ? <RestaurantExtraPresets presets={presets as Extras} setPresets={setPresets} /> : null}
+            {restaurant.extra_presets ? <RestaurantExtraPresets setCategories={setCategoriesState} presets={presets as Extras} setPresets={setPresets} categories={categoriesState} /> : null}
 
             <button className='flex flex-row content-center cursor-pointer btn-primary'
               onClick={() => setOpenPresetModal(true)}>
@@ -463,7 +617,10 @@ const Menu = (props: Props) => {
 
 
           </div>
-          <button onClick={saveCategoriesAndGerichteToSupabase} className='h-12 mt-5 btn-secondary'>
+          <button onClick={addNewCategory} className='h-12 mt-5 btn-secondary'>
+            Neue Kategorie hinzufügen
+          </button>
+          <button onClick={saveCategoriesAndGerichteAndPresetsToSupabase} className='h-12 mt-5 btn-primary'>
             Speichern
           </button>
         </div>
@@ -472,7 +629,11 @@ const Menu = (props: Props) => {
   )
 }
 
-const RestaurantExtraPresets = ({ presets, setPresets }: { presets: Extras, setPresets: Dispatch<Extras> }) => {
+const RestaurantExtraPresets = ({ presets, setPresets, categories, setCategories }: {
+  presets: Extras, setPresets: Dispatch<Extras>,
+  categories: Categories,
+  setCategories: Dispatch<Categories>
+}) => {
   // exit guards
 
   if (!presets.length) return <></>
@@ -482,21 +643,50 @@ const RestaurantExtraPresets = ({ presets, setPresets }: { presets: Extras, setP
   return <>
     {presets.map((preset, index) => (
       <div key={index} className='flex flex-col items-center w-full my-2'>
-        <RestaurantExtraPreset preset={preset} index={index} setPresets={setPresets} presets={presets} />
+        <RestaurantExtraPreset preset={preset} index={index} setPresets={setPresets} presets={presets} categories={categories}
+          setCategories={setCategories}
+        />
       </div>
     ))}
   </>
 }
 
-const RestaurantExtraPreset = ({ preset, index, setPresets, presets }: {
+const RestaurantExtraPreset = ({ preset, index, setPresets, presets, categories, setCategories }: {
   preset: { items: Extra[], name: string, typ: 'oneOf' | 'manyOf' },
   index: number,
   setPresets: Dispatch<Extras>,
-  presets: Extras
+  presets: Extras,
+  categories: Categories,
+  setCategories: Dispatch<Categories>
 }) => {
   const [openEditModal, setOpenEditModal] = useState(false)
 
   const deleteCurrentPreset = () => {
+    alert(JSON.stringify(categories))
+    // check if the preset is used in any gericht in the menu. If so, we throw a prompt t oask for confirmation
+    for (const category of categories) {
+      for (const gericht of category.gerichte) {
+        if (!gericht.extras) continue
+        for (const extra of gericht.extras) {
+          if (extra.name === preset.name) {
+            const res = confirm('Dieses Preset mit Extras wird noch verwendet. Wenn Sie es trotzdem entfernen, müssen Sie die Extras in jedem Gericht einzeln entfernen.')
+            if (res === false) { return } else {
+              // remove the preset from the gericht
+              const newCategories = [...categories]
+              const currentCategory = newCategories.findIndex(c => c.id === category.id)
+              const currentGericht = newCategories[currentCategory].gerichte.findIndex(g => g.id === gericht.id)
+              const currentExtra = newCategories[currentCategory].gerichte[currentGericht].extras?.findIndex(e => e.name === extra.name)
+              if (currentExtra !== undefined) {
+                newCategories[currentCategory].gerichte[currentGericht].extras?.splice(currentExtra, 1)
+              }
+              setCategories(newCategories)
+            }
+          }
+        }
+      }
+    }
+
+
     const newPresets = [...presets]
     newPresets.splice(index, 1)
     setPresets(newPresets)

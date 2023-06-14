@@ -8,7 +8,7 @@ import {
   XMarkIcon as XCircleIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid'
-import { Categories as Karte, Gericht } from '@/types/schema'
+import { Categories as Karte, Gericht, Extras, Extra } from '@/types/schema'
 import { set } from 'zod'
 
 const team = [
@@ -55,12 +55,13 @@ type Props = {
   gericht: Gericht
   setCategories: Dispatch<Karte>
   categories: Karte
+  presets: Extras
 }
 
 export default function GerichtsModal(props: Props) {
-  //const [open, setOpen] = useState(true)
+  const [currentSelectedPreset, setCurrentSelectedPreset] = useState<string>('')
 
-  const { show: open = false, setShow, gericht, setCategories, categories } = props
+  const { show: open = false, setShow, gericht, setCategories, categories, presets } = props
 
   const id = gericht.id
 
@@ -87,6 +88,8 @@ export default function GerichtsModal(props: Props) {
     setLocalGericht(gericht)
     setShow(false)
   }
+
+  const [showExtraEdit, setShowExtraEdit] = useState<boolean>(false)
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -223,91 +226,56 @@ export default function GerichtsModal(props: Props) {
                           </div>
                           <fieldset>
                             <legend className='text-sm font-medium text-gray-900'>
-                              Privacy
+                              Extra-Attribute
                             </legend>
                             <div className='mt-2 space-y-5'>
-                              <div className='relative flex items-start'>
-                                <div className='absolute flex items-center h-5'>
-                                  <input
-                                    id='privacy-public'
-                                    name='privacy'
-                                    aria-describedby='privacy-public-description'
-                                    type='radio'
-                                    className='w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500'
-                                    defaultChecked
-                                  />
-                                </div>
-                                <div className='text-sm pl-7'>
-                                  <label
-                                    htmlFor='privacy-public'
-                                    className='font-medium text-gray-900'>
+                              <select
+                                onChange={e => {
+                                  e.preventDefault()
+                                  setCurrentSelectedPreset(e.target.value)
+                                }}
+                                value={currentSelectedPreset}
+                              >
+                                {presets.map((preset, index) => (<option key={index}
+                                  value={preset.name}>{preset.name}</option>
+                                ))}
+                              </select>
 
-                                    Public access
-                                  </label>
-                                  <p
-                                    id='privacy-public-description'
-                                    className='text-gray-500'>
-                                    Everyone with the link will see this
-                                    project.
-                                  </p>
-                                </div>
-                              </div>
-                              <div>
-                                <div className='relative flex items-start'>
-                                  <div className='absolute flex items-center h-5'>
-                                    <input
-                                      id='privacy-private-to-project'
-                                      name='privacy'
-                                      aria-describedby='privacy-private-to-project-description'
-                                      type='radio'
-                                      className='w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500'
-                                    />
-                                  </div>
-                                  <div className='text-sm pl-7'>
-                                    <label
-                                      htmlFor='privacy-private-to-project'
-                                      className='font-medium text-gray-900'>
+                              <button className='btn-secondary' disabled={!currentSelectedPreset}
+                                onClick={e => {
+                                  e.preventDefault()
+                                  const newExtras = localGericht?.extras ?? []
+                                  const selectedPreset = presets.find(p => p.name === currentSelectedPreset)
 
-                                      Private to project members
-                                    </label>
-                                    <p
-                                      id='privacy-private-to-project-description'
-                                      className='text-gray-500'>
-                                      Only members of this project would be able
-                                      to access.
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div>
-                                <div className='relative flex items-start'>
-                                  <div className='absolute flex items-center h-5'>
-                                    <input
-                                      id='privacy-private'
-                                      name='privacy'
-                                      aria-describedby='privacy-private-to-project-description'
-                                      type='radio'
-                                      className='w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500'
-                                    />
-                                  </div>
-                                  <div className='text-sm pl-7'>
-                                    <label
-                                      htmlFor='privacy-private'
-                                      className='font-medium text-gray-900'>
-
-                                      Private to you
-                                    </label>
-                                    <p
-                                      id='privacy-private-description'
-                                      className='text-gray-500'>
-                                      You are the only one able to access this
-                                      project.
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                                  // if the preset is not already in the extras, add it
+                                  if (selectedPreset && !newExtras.find(e => e.name === selectedPreset.name)) {
+                                    newExtras.push(selectedPreset)
+                                    setLocalGericht({ ...localGericht, extras: newExtras })
+                                  }
+                                }}
+                              >Hinzufügen</button>
                             </div>
+
                           </fieldset>
+
+
+                          {/* Extras */}
+                          <div className='flex flex-col w-full gap-y-2'>
+                            {localGericht.extras?.map((extra, index) => (<div key={index}>
+                              <div className='flex flex-row items-center justify-between p-2 bg-sepia-50'>
+                                <p className='cursor-pointer hover:text-gray-600 hover:underline'>{extra.name}</p>
+
+                                
+                                <XCircleIcon className='w-6 h-6 cursor-pointer hover:text-gray-600' onClick={() => {
+                                  const newExtras = localGericht?.extras ?? []
+                                  newExtras.splice(index, 1)
+                                  setLocalGericht({ ...localGericht, extras: newExtras })
+                                }} />
+                              </div>
+                            </div>))}
+
+                          </div>
+
                         </div>
                         <div className='pt-4 pb-6'>
                           <div className='flex text-sm'>
@@ -318,7 +286,7 @@ export default function GerichtsModal(props: Props) {
                                 className='w-5 h-5 text-indigo-500 group-hover:text-indigo-900'
                                 aria-hidden='true'
                               />
-                              <span className='ml-2'> Copy link </span>
+                              <span className='ml-2'>Copy link</span>
                             </a>
                           </div>
                           <div className='flex mt-4 text-sm'>

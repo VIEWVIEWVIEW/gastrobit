@@ -193,8 +193,9 @@ function Restaurant({ restaurant, domains }: Props) {
     <MainLayout>
       <main className='container mx-auto'>
         <div className='flex flex-col px-10 m-2'>
-          <h1 className='text-3xl font-bold text-center'>
+          <h1 className='flex flex-row justify-center text-3xl font-bold text-center'>
             Restaurant &quot;{restaurant.name}&quot;
+
           </h1>
 
           <form className='container p-4 mx-auto space-y-8 divide-y divide-gray-200'>
@@ -202,7 +203,7 @@ function Restaurant({ restaurant, domains }: Props) {
               {/** Settings */}
 
               <div>
-                <div>
+                <div className='flex flex-col'>
                   <h3 className='mt-10 text-lg font-medium leading-6 text-gray-900'>
                     Einstellungen
                   </h3>

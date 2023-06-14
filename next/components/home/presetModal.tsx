@@ -30,9 +30,6 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
 
 
   const addPresetToPresets = () => {
-
-
-
     if (!name) {
       toast.error('Bitte füllen Sie den Namen aus')
       return
@@ -60,7 +57,8 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
     const newPreset: Extras[number] = {
       name,
       typ,
-      items
+      // @ts-ignore parse
+      items: items.map(item => ({ name: item.name, preis: parseFloat(item.preis) }))
     }
 
 
@@ -79,14 +77,6 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
     setOpen(false)
   }
 
-  const calcNewPreset = () => {
-    const newPreset: Extras[number] = {
-      name,
-      typ,
-      items
-    }
-    return newPreset
-  }
 
   const cancelButtonRef = useRef(null)
   return (
