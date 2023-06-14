@@ -22,6 +22,7 @@ type PageProps = {
 import { Category, Extra, Extras, Gericht, Karte } from "@/types/schema"
 import { Dispatch, Fragment, useEffect, useState } from 'react'
 import useCart from '@/components/restaurant/cartContext'
+import Link from 'next/link'
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
   /**
@@ -322,6 +323,11 @@ function GerichtRow({ gericht }: { gericht: Gericht }) {
 
 function Karte({ karte }: { karte: Karte }) {
   const cart = useCart()
+
+  const calculateCartPrice = () => {
+    return cart.gerichte.reduce((acc, curr) => acc + curr.preis, 0)
+  }
+
   return (
     <div className='grid grid-cols-3 space-x-5'>
       <div className='flex flex-col col-span-2'>
@@ -337,7 +343,7 @@ function Karte({ karte }: { karte: Karte }) {
         <p>Warenkorb</p>
         <div className='flex flex-col' suppressHydrationWarning>
           {cart.gerichte.map((gericht, index) => <WarenkorbRow gericht={gericht} key={index} index={index} karte={karte} />)}
-          {cart.gerichte.length > 0 ? <button className='btn btn-primary'>Bestellen</button> : <p className='text-sm'>Warenkorb ist leer</p>}
+          {cart.gerichte.length > 0 ? <Link href='/checkout' className='btn btn-primary'>Bestellen für {calculateCartPrice()}€</Link> : <p className='text-sm'>Warenkorb ist leer</p>}
 
         </div>
       </div>

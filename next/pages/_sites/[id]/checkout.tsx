@@ -1,40 +1,65 @@
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
-
+import useCart from '@/components/restaurant/cartContext'
+import Link from 'next/link'
 import type { ParsedUrlQuery } from "querystring"
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { Database } from '@/types/supabase'
 
+import RestaurantLayout from '@/components/layouts/RestaurantLayout'
 interface PathProps extends ParsedUrlQuery {
   site: string
   slug: string
 }
 
-export const getServerSideProps: GetServerSideProps = async function ({
-  req,
-  res,
-  params,
-}) {
-  res.setHeader(
+type Restaurant = Database['public']['Tables']['restaurants']['Row']
+
+type PageProps = {
+  params: PathProps
+  restaurant: Restaurant
+}
+
+export const getServerSideProps: GetServerSideProps = async function (ctx) {
+  ctx.res.setHeader(
     'Cache-Control',
     'public, s-maxage=10, stale-while-revalidate=59',
   )
 
   // get the current subdomain
 
-  console.log('fetched', params)
+  const supabase = createServerSupabaseClient<Database>(ctx)
+
+  console.warn('Restaurant id', ctx.params!.id, "domain")
+  const { data: restaurant, error } = await supabase
+    .from('restaurants')
+    .select()
+    .eq('id', ctx.params!.id)
+    .single()
 
   return {
     props: {
-      params,
+      params: ctx.params,
+      restaurant,
     },
   }
 }
 
-function Page(props: any) {
+function Page(props: PageProps) {
   const router = useRouter()
+  const { name, karte, extra_presets } = props.restaurant
+
+  const cart = useCart()
+
   return (
-    <div>
-      Checkout {router.route} {JSON.stringify(props)}{' '}
-    </div>
+    <RestaurantLayout theme={'corporate'} restaurant={props.restaurant}>
+      <div className='container mx-auto' suppressHydrationWarning>
+        {/* If we are on a mobile device, we have two columns.
+          On Desktop, we have a single column but with a floating action button
+        */}
+
+      </div>
+
+    </RestaurantLayout>
   )
 }
 
