@@ -48,7 +48,7 @@ function Supabase({ supabase }: { supabase: SupabaseClient }) {
             extend: false,
             className: {
               button:
-                'btn-primary flex flex-row justify-center items-center focus:ring-0 w-80 break-normal',
+                'gastrobit-btn-primary flex flex-row justify-center items-center focus:ring-0 w-80 break-normal',
               container: 'mb-4 mt-2  flex flex-col justify-center items-center',
               anchor: 'text-taubmanspurple-600 hover:text-taubmanspurple-400',
               divider: 'w-full border-t border-gray-300 my-4',

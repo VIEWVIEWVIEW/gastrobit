@@ -91,12 +91,12 @@ const AddRestaurant = (props: Props) => {
 
             <div className="flex justify-end pt-5">
               <Link href={'/'}
-                className="mr-2 btn-secondary"
+                className="mr-2 gastrobit-btn-secondary"
               >
                 Abbrechen
               </Link>
 
-              <input type="submit" className="inline-flex justify-center cursor-pointer btn-primary" value={"Weiter"} />
+              <input type="submit" className="inline-flex justify-center cursor-pointer gastrobit-btn-primary" value={"Weiter"} />
 
             </div>
 

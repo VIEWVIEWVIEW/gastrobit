@@ -54,10 +54,14 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
 
 function Page(props: PageProps) {
   const router = useRouter()
+  const { name, karte, extra_presets } = props.restaurant
 
   return (
-    <RestaurantLayout theme={'corporate'}>
+    <RestaurantLayout theme={'corporate'} restaurant={props.restaurant}>
       <div className='container mx-auto'>
+        {/* If we are on a mobile device, we have two columns.
+          On Desktop, we have a single column but with a floating action button
+        */}
         {props.restaurant.karte ? <Karte karte={props.restaurant.karte as Karte} /> : "Keine Karte vorhanden. Bitte erstellen Sie eine auf Gastrobit.de"}
       </div>
     </RestaurantLayout>

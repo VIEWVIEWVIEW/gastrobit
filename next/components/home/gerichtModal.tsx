@@ -241,7 +241,7 @@ export default function GerichtsModal(props: Props) {
                                 ))}
                               </select>
 
-                              <button className='btn-secondary' disabled={!currentSelectedPreset}
+                              <button className='gastrobit-btn-secondary' disabled={!currentSelectedPreset}
                                 onClick={e => {
                                   e.preventDefault()
                                   const newExtras = localGericht?.extras ?? []
@@ -309,13 +309,13 @@ export default function GerichtsModal(props: Props) {
                   <div className='flex justify-end flex-shrink-0 px-4 py-4'>
                     <button
                       type='button'
-                      className='mr-2 btn-secondary'
+                      className='mr-2 gastrobit-btn-secondary'
                       onClick={abort}>
                       Abbrechen
                     </button>
                     <button
                       type='submit'
-                      className='btn-primary'
+                      className='gastrobit-btn-primary'
                       onClick={saveGericht}
                     >
                       Ändern

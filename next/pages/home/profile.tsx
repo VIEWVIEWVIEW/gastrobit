@@ -138,7 +138,7 @@ function Profile({ user }: Props) {
                       <input
                         value='Speichern'
                         type='submit'
-                        className='w-full mt-10 cursor-pointer btn-primary'
+                        className='w-full mt-10 cursor-pointer gastrobit-btn-primary'
                       />
                     </div>
 
@@ -152,7 +152,7 @@ function Profile({ user }: Props) {
                     <div className='mt-1 sm:mt-0 sm:col-span-2'>
                       <div className='flex max-w-lg rounded-md shadow-sm'>
                         <Link
-                          className='flex-1 w-full min-w-0 btn-secondary'
+                          className='flex-1 w-full min-w-0 gastrobit-btn-secondary'
                           href='/mfa'>
                           Aktivieren
                         </Link>

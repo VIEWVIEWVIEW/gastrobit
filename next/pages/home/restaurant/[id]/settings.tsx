@@ -181,7 +181,7 @@ function Restaurant({ restaurant, domains }: Props) {
             <h1 className='text-3xl font-bold text-center'>
               Bisher hast du kein Restaurant erstellt.
             </h1>
-            <a href='/restaurant/create' className='btn-primary'>
+            <a href='/restaurant/create' className='gastrobit-btn-primary'>
               Erstelle jetzt dein Restaurant
             </a>
           </div>
@@ -236,7 +236,7 @@ function Restaurant({ restaurant, domains }: Props) {
                         </span>
                       </div>
 
-                      <button className='mt-2 btn-primary' onClick={updateSubdomain}>Speichern</button>
+                      <button className='mt-2 gastrobit-btn-primary' onClick={updateSubdomain}>Speichern</button>
                     </div>
 
                     <hr className='col-span-3' />

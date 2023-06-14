@@ -97,7 +97,7 @@ const DomainCard = ({ domain, revalidateDomains, index }: { domain: string, reva
                 className={`${isValidating
                   ? 'cursor-not-allowed bg-gray-100'
                   : 'bg-white hover:text-black hover:border-black'
-                  } btn-secondary hover:bg-sentrysilver-100 w-32`}>
+                  } gastrobit-btn-secondary hover:bg-sentrysilver-100 w-32`}>
                 {isValidating ? <Loader /> : 'Aktualisieren'}
               </button>
               <button

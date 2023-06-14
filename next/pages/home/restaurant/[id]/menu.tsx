@@ -601,7 +601,7 @@ const Menu = (props: Props) => {
             </div>
             {restaurant.extra_presets ? <RestaurantExtraPresets setCategories={setCategoriesState} presets={presets as Extras} setPresets={setPresets} categories={categoriesState} /> : null}
 
-            <button className='flex flex-row content-center cursor-pointer btn-primary'
+            <button className='flex flex-row content-center cursor-pointer gastrobit-btn-primary'
               onClick={() => setOpenPresetModal(true)}>
               <div>
                 Preset hinzufügen
@@ -617,10 +617,10 @@ const Menu = (props: Props) => {
 
 
           </div>
-          <button onClick={addNewCategory} className='h-12 mt-5 btn-secondary'>
+          <button onClick={addNewCategory} className='h-12 mt-5 gastrobit-btn-secondary'>
             Neue Kategorie hinzufügen
           </button>
-          <button onClick={saveCategoriesAndGerichteAndPresetsToSupabase} className='h-12 mt-5 btn-primary'>
+          <button onClick={saveCategoriesAndGerichteAndPresetsToSupabase} className='h-12 mt-5 gastrobit-btn-primary'>
             Speichern
           </button>
         </div>
@@ -715,7 +715,7 @@ const RestaurantExtraPreset = ({ preset, index, setPresets, presets, categories,
 
         <XMarkIcon className='w-6 h-6 cursor-pointer' onClick={deleteCurrentPreset} />
 
-        <button className='w-25 btn-secondary'
+        <button className='w-25 gastrobit-btn-secondary'
           onClick={e => {
             e.preventDefault()
             setOpenEditModal(true)

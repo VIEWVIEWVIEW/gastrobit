@@ -97,7 +97,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
           </p>
         </div>
         <div className='mt-4 sm:mt-0 sm:ml-16 sm:flex-none'>
-          <Link className='btn-primary' href={'/restaurant/add'}>
+          <Link className='gastrobit-btn-primary' href={'/restaurant/add'}>
             Restaurant hinzufügen
           </Link>
         </div>

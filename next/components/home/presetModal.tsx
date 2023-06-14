@@ -149,19 +149,19 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
 
                   <button
                     type="button"
-                    className="btn-primary"
+                    className="gastrobit-btn-primary"
                     onClick={addNewItem}
                   >
                     Extra hinzufügen
                   </button>
 
                   <div className='flex flex-row space-x-2'>
-                    <button className='btn-secondary'
+                    <button className='gastrobit-btn-secondary'
                       onClick={() => setOpen(false)}
                     >
                       Abbrechen
                     </button>
-                    <button className='btn-primary'
+                    <button className='gastrobit-btn-primary'
                       onClick={addPresetToPresets}>
                       {index ? 'Ändern' : 'Hinzufügen'}
                     </button>

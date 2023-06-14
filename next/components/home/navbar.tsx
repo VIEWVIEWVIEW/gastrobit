@@ -72,7 +72,7 @@ const Navbar = () => {
               </div>
             </div>
             <div className='hidden md:flex md:items-center md:space-x-6'>
-              <Link href='/login' className='btn-primary'>
+              <Link href='/login' className='gastrobit-btn-primary'>
                 Anmelden
               </Link>
             </div>
