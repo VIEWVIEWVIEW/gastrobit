@@ -226,12 +226,12 @@ function Restaurant({ restaurant, domains }: Props) {
                           name='subdomain'
                           id='subdomain'
                           autoComplete='subdomain'
-                          className='flex-1 block w-full min-w-0 input'
+                          className='flex-1 block w-full min-w-0 gastrobit-input'
                           placeholder='pizzapalast-hagen'
                           value={gastrobitSubdomain}
                           onChange={e => setGastrobitSubdomain(e.target.value)}
                         />
-                        <span className='inline-flex items-center px-3 text-gray-500 border-l-0 input bg-slate-200'>
+                        <span className='inline-flex items-center px-3 text-gray-500 border-l-0 gastrobit-input bg-slate-200'>
                           .gastrobit.de
                         </span>
                       </div>
@@ -252,12 +252,12 @@ function Restaurant({ restaurant, domains }: Props) {
                           name='customDomain'
                           id='customDomain'
                           autoComplete='customDomain'
-                          className='flex-1 block w-full min-w-0 input'
+                          className='flex-1 block w-full min-w-0 gastrobit-input'
                           placeholder='pizzapalast.de'
                           value={newCustomDomain}
                           onChange={e => setNewCustomDomain(e.target.value)}
                         />
-                        <button className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-500'
+                        <button className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer gastrobit-input bg-taubmanspurple-500'
                           onClick={addDomainToRestaurant} disabled={isLoading}>
                           Hinzufügen
                         </button>
@@ -313,7 +313,7 @@ const CustomDomains = ({
                 name='subdomain'
                 id='subdomain'
                 autoComplete='subdomain'
-                className='flex-1 block w-full min-w-0 input'
+                className='flex-1 block w-full min-w-0 gastrobit-input'
                 value={domain}
                 onChange={e => {
                   const newDomains = [...domains]
@@ -322,7 +322,7 @@ const CustomDomains = ({
                 }}
               />
               <span
-                className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer input bg-taubmanspurple-600'
+                className='inline-flex items-center px-3 text-white border-l-0 cursor-pointer gastrobit-input bg-taubmanspurple-600'
                 onClick={() => {
                   const newDomains = [...domains]
                   newDomains.splice(index, 1)

@@ -53,7 +53,7 @@ function Supabase({ supabase }: { supabase: SupabaseClient }) {
               anchor: 'text-taubmanspurple-600 hover:text-taubmanspurple-400',
               divider: 'w-full border-t border-gray-300 my-4',
               label: 'text-sm flex',
-              input: 'input mb-2 w-80 ',
+              input: 'gastrobit-input mb-2 w-80 ',
               loader: 'loader',
               message:
                 'text-semibold text-white bg-taubmanspurple-500 mt-4  text-lg p-4 flex flex-row justify-center text-center underline decoration-double decoration-white word-wrap break-word w-80',

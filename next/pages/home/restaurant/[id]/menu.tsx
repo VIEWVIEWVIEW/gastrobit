@@ -465,7 +465,15 @@ const SortableCategory = ({
               setCategories(newCategories)
 
             }} />
+
           </div>
+            {/* Delete category button */}
+            <XMarkIcon className='l-2 text-white border-white cursor-pointer p-0.5 hover:text-gray-200 bg-red-500 h-9 w-9' onClick={() => {
+              const newCategories = [...categories]
+              const index = newCategories.findIndex(c => c.id === category.id)
+              newCategories.splice(index, 1)
+              setCategories(newCategories)
+            }} />
         </h2>
 
         <div className='w-full'>
@@ -534,7 +542,7 @@ const Menu = (props: Props) => {
   const saveCategoriesAndGerichteAndPresetsToSupabase = async () => {
     // validate "categories" with schema "category"
     categories.parse(categoriesState)
-    extras.parse(presets)
+    const res = extras.safeParse(presets)
 
     // Speisekarte speichern
     {

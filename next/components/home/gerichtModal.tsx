@@ -144,7 +144,7 @@ export default function GerichtsModal(props: Props) {
                             <div className='mt-1'>
                               <input
                                 type='text'
-                                className='w-full input'
+                                className='w-full gastrobit-input'
                                 value={localGericht.ueberschrift}
                                 onChange={e => setLocalGericht({ ...localGericht, ueberschrift: e.target.value })}
                               />
@@ -179,7 +179,7 @@ export default function GerichtsModal(props: Props) {
 
                                     className='flex flex-row space-x-3'>
                                     {/* Input for "klein", "mittel", "groß" etc */}
-                                    <input type='text' className='flex-grow input' value={preis.name} onChange={e => {
+                                    <input type='text' className='flex-grow gastrobit-input' value={preis.name} onChange={e => {
                                       const newPreise = [...localGericht.preise]
                                       newPreise[index].name = e.target.value
                                       setLocalGericht({ ...localGericht, preise: newPreise })
@@ -188,7 +188,7 @@ export default function GerichtsModal(props: Props) {
                                     {/* Input for the price */}
                                     <input
                                       type='number'
-                                      className='w-1/4 input'
+                                      className='w-1/4 gastrobit-input'
                                       step="any"
                                       value={preis.preis}
                                       onChange={e => {
@@ -229,7 +229,8 @@ export default function GerichtsModal(props: Props) {
                               Extra-Attribute
                             </legend>
                             <div className='mt-2 space-y-5'>
-                              <select
+                              {/* Presets */}
+                              {presets.length > 0 && <select
                                 onChange={e => {
                                   e.preventDefault()
                                   setCurrentSelectedPreset(e.target.value)
@@ -239,7 +240,8 @@ export default function GerichtsModal(props: Props) {
                                 {presets.map((preset, index) => (<option key={index}
                                   value={preset.name}>{preset.name}</option>
                                 ))}
-                              </select>
+                              </select>}
+
 
                               <button className='gastrobit-btn-secondary' disabled={!currentSelectedPreset}
                                 onClick={e => {
@@ -265,7 +267,7 @@ export default function GerichtsModal(props: Props) {
                               <div className='flex flex-row items-center justify-between p-2 bg-sepia-50'>
                                 <p className='cursor-pointer hover:text-gray-600 hover:underline'>{extra.name}</p>
 
-                                
+
                                 <XCircleIcon className='w-6 h-6 cursor-pointer hover:text-gray-600' onClick={() => {
                                   const newExtras = localGericht?.extras ?? []
                                   newExtras.splice(index, 1)

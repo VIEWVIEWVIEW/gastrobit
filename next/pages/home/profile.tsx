@@ -107,7 +107,7 @@ function Profile({ user }: Props) {
                           type='text'
                           id='email'
                           autoComplete='email'
-                          className='flex-1 block w-full min-w-0 input'
+                          className='flex-1 block w-full min-w-0 gastrobit-input'
                           placeholder='name@domain.com'
                           {...register('email')}
                         />
@@ -127,7 +127,7 @@ function Profile({ user }: Props) {
                           type='password'
                           id='password'
                           autoComplete='password'
-                          className='flex-1 block w-full min-w-0 input'
+                          className='flex-1 block w-full min-w-0 gastrobit-input'
                           placeholder='Passwort'
                           {...register('password')}
                         />

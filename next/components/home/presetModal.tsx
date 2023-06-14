@@ -104,13 +104,13 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
                     {/* Name of preset */}
                     <div>
                       <label className="text-sm text-gray-400">Name des Presets</label>
-                      <input type='text' className='w-full input' placeholder='Ihre Salatsauce' value={name} onChange={(e) => setName(e.target.value)} />
+                      <input type='text' className='w-full gastrobit-input' placeholder='Ihre Salatsauce' value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
 
                     {/* any of / one of */}
                     <div>
                       <label className="text-sm text-gray-400">Auswahlmöglichkeit für den Kunden (z.B. "Einzelauswahl" bei Salatsoße, und "Mehrfachauswahl" bei Pizzabelägen)</label>
-                      <select className='w-full cursor-pointer input' value={typ} onChange={e => setTyp(e.target.value as "oneOf" | "manyOf")}>
+                      <select className='w-full cursor-pointer gastrobit-input' value={typ} onChange={e => setTyp(e.target.value as "oneOf" | "manyOf")}>
                         <option value='oneOf'>Einzelauswahl</option>
                         <option value='manyOf'>Mehrfachauswahl</option>
                       </select>
@@ -122,13 +122,13 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
                 <div className='my-4 space-y-2'>
                   {items.map((item, i) => (
                     <div key={i} className='flex items-center justify-between w-full gap-x-4'>
-                      <input type='text' className='w-full input' placeholder='Name des Extras' value={item.name} onChange={(e) => {
+                      <input type='text' className='w-full gastrobit-input' placeholder='Name des Extras' value={item.name} onChange={(e) => {
                         const newItems = [...items]
                         newItems[i].name = e.target.value
                         setItems(newItems)
                       }} />
 
-                      <input type='number' className='w-full input' placeholder='Preis' value={item.preis} onChange={(e) => {
+                      <input type='number' className='w-full gastrobit-input' placeholder='Preis' value={item.preis} onChange={(e) => {
                         const newItems = [...items]
                         // @ts-ignore We need a string here. We can parse it later
                         newItems[i].preis = e.target.value
