@@ -286,32 +286,7 @@ export default function GerichtsModal(props: Props) {
                           </div>
 
                         </div>
-                        <div className='pt-4 pb-6'>
-                          <div className='flex text-sm'>
-                            <a
-                              href='#'
-                              className='inline-flex items-center font-medium text-indigo-600 group hover:text-indigo-900'>
-                              <LinkIcon
-                                className='w-5 h-5 text-indigo-500 group-hover:text-indigo-900'
-                                aria-hidden='true'
-                              />
-                              <span className='ml-2'>Copy link</span>
-                            </a>
-                          </div>
-                          <div className='flex mt-4 text-sm'>
-                            <a
-                              href='#'
-                              className='inline-flex items-center text-gray-500 group hover:text-gray-900'>
-                              <QuestionMarkCircleIcon
-                                className='w-5 h-5 text-gray-400 group-hover:text-gray-500'
-                                aria-hidden='true'
-                              />
-                              <span className='ml-2'>
-                                Learn more about sharing
-                              </span>
-                            </a>
-                          </div>
-                        </div>
+                        
                       </div>
                     </div>
                   </div>
