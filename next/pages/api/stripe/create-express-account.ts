@@ -82,8 +82,8 @@ const handler: NextApiHandler = async function (req, res) {
   // get account link
   const accountLink = await stripe.accountLinks.create({
     account: account.id,
-    refresh_url: 'http://localhost:3000',
-    return_url: 'http://localhost:3000',
+    refresh_url: process.env.STRIPE_REFRESH_URL,
+    return_url: process.env.STRIPE_RETURN_URL,
     type: 'account_onboarding',
   });
 
