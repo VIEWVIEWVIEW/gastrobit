@@ -204,7 +204,7 @@ const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: strin
 
   if (!subdomain) return <></>
   return <a
-    href={'https://' + subdomain + domain}
+    href={'https://' + (subdomain ?? domain)}
     className='py-3 hover:text-gray-400 hover:underline'>
     Zur Website
   </a>
