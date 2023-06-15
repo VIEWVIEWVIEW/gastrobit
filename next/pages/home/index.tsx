@@ -167,11 +167,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
                         </Link>
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                        <a
-                          href={'http://' + "@TODO"}
-                          className='py-3 hover:text-gray-400 hover:underline'>
-                          Zur Website
-                        </a>
+                        <WebsiteLink id={restaurant.id} subdomain={restaurant.subdomain} />
                       </td>
                     </tr>
                   ))}
@@ -183,4 +179,33 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
       </div>
     </div>
   )
+}
+
+
+const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: string | null }) => {
+  const [domain, setDomain] = useState<string | undefined>(undefined)
+  const supabase = useSupabaseClient<Database>()
+
+  useEffect(() => {
+    const fetchDomain = async () => {
+      const { data, error } = await supabase
+        .from('custom_domains')
+        .select()
+        .eq('restaurant_id', id)
+        .limit(1)
+        .single()
+      console.log(data, error)
+
+      if (error) return console.log('error', error)
+      if (data.domain) setDomain(data.domain)
+    }
+    fetchDomain()
+  }, [supabase, id])
+
+  if (!subdomain) return <></>
+  return <a
+    href={'https://' + subdomain + domain}
+    className='py-3 hover:text-gray-400 hover:underline'>
+    Zur Website
+  </a>
 }

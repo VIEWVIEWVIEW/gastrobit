@@ -2,7 +2,7 @@ import React from 'react'
 
 function FourOhFour(props: any) {
   return (
-    <div>FourOhFour {JSON.stringify(props)}</div>
+    <div>404 Not Found. Debug: {JSON.stringify(props)}</div>
   )
 }
 

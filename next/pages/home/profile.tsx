@@ -12,6 +12,7 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { EnrollMFA } from '@/components/home/enrollmfa'
 import Link from 'next/link'
 import { Database } from '@/types/supabase'
+import toast from 'react-hot-toast'
 
 type Props = {
   user: Session['user']
@@ -62,6 +63,8 @@ function Profile({ user }: Props) {
       const { data: result, error } = await supabase.auth.updateUser({
         email: data.email,
       })
+      if (!error) toast.success('Email wurde geändert')
+      else toast.error('Email konnte nicht geändert werden')
     }
 
     if (data.password !== '') {
@@ -71,7 +74,8 @@ function Profile({ user }: Props) {
         password: data.password,
       })
 
-      console.log(result)
+      if (!error) toast.success('Passwort wurde geändert')
+      else toast.error('Passwort konnte nicht geändert werden')
     }
   }
 
