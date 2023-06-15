@@ -357,6 +357,15 @@ const SortableCategory = ({
     ? category.gerichte.find(c => c.id === activeId)
     : null
 
+
+  const renameCurrentCategory = () => {
+    const newName = prompt('Neuer Name der Kategorie') || 'Neue Kategorie'
+    const newCategories = [...categories]
+    const currentCategory = newCategories.findIndex(c => c.id === category.id)
+    newCategories[currentCategory].name = newName
+    setCategories(newCategories)
+  }
+
   return (
     <>
       <div className='flex flex-col items-center w-full'>
@@ -423,7 +432,7 @@ const SortableCategory = ({
           </div>
 
 
-          <div>
+          <div className="cursor-pointer" onClick={renameCurrentCategory}>
             {category.name}
           </div>
 
@@ -467,13 +476,13 @@ const SortableCategory = ({
             }} />
 
           </div>
-            {/* Delete category button */}
-            <XMarkIcon className='l-2 text-white border-white cursor-pointer p-0.5 hover:text-gray-200 bg-red-500 h-9 w-9' onClick={() => {
-              const newCategories = [...categories]
-              const index = newCategories.findIndex(c => c.id === category.id)
-              newCategories.splice(index, 1)
-              setCategories(newCategories)
-            }} />
+          {/* Delete category button */}
+          <XMarkIcon className='l-2 text-white border-white cursor-pointer p-0.5 hover:text-gray-200 bg-red-500 h-9 w-9' onClick={() => {
+            const newCategories = [...categories]
+            const index = newCategories.findIndex(c => c.id === category.id)
+            newCategories.splice(index, 1)
+            setCategories(newCategories)
+          }} />
         </h2>
 
         <div className='w-full'>
@@ -571,10 +580,14 @@ const Menu = (props: Props) => {
   }
 
   const addNewCategory = () => {
+
     const newCategories = [...categoriesState]
+
+    const newCategoryName = prompt('Name der neuen Kategorie') || 'Neue Kategorie'
+
     const newCategory: Category = {
       id: self.crypto.randomUUID(),
-      name: 'Neue Kategorie',
+      name: newCategoryName,
       gerichte: [],
     }
     newCategories.push(newCategory)
@@ -643,10 +656,7 @@ const RestaurantExtraPresets = ({ presets, setPresets, categories, setCategories
   setCategories: Dispatch<Categories>
 }) => {
   // exit guards
-
   if (!presets.length) return <></>
-
-
 
   return <>
     {presets.map((preset, index) => (

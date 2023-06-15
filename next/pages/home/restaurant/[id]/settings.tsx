@@ -88,6 +88,7 @@ export interface GetDomainsAnswer {
   verified: boolean;
 }
 
+import themes from '@/types/themes'
 
 function Restaurant({ restaurant, domains }: Props) {
   const router = useRouter()
@@ -100,7 +101,6 @@ function Restaurant({ restaurant, domains }: Props) {
   const [gastrobitSubdomain, setGastrobitSubdomain] = useState(restaurant.subdomain?.split('.')[0] || '')
 
   // set list of customdomains, which don't belong to the subdomain 'gastrobit.de'
-
   const [newCustomDomain, setNewCustomDomain] = useState('')
 
   const { data: domainList, mutate: revalidateDomains, isLoading } =
@@ -111,6 +111,9 @@ function Restaurant({ restaurant, domains }: Props) {
 
   const [addCustomDomainLoadingAnimation, setAddCustomDomainLoadingAnimation] = useState(false)
   const [updatingSubdomain, setUpdatingSubdomain] = useState(false)
+
+  // theme state
+  const [theme, setTheme] = useState(restaurant.theme || 'corporate')
 
   // add a new custom domain
   const addDomainToRestaurant = async (e: any) => {
@@ -169,6 +172,22 @@ function Restaurant({ restaurant, domains }: Props) {
     setUpdatingSubdomain(false)
   }
 
+  const updateTheme = async (e: any) => {
+    e.preventDefault()
+
+    const supabase = createBrowserSupabaseClient<Database>()
+    const { data, error } = await supabase
+      .from('restaurants')
+      .update({ theme })
+      .eq('id', restaurant.id)
+
+    if (error) {
+      toast.error(error.message)
+    } else {
+      toast.success('Theme erfolgreich geändert.')
+    }
+  }
+
 
 
 
@@ -214,6 +233,25 @@ function Restaurant({ restaurant, domains }: Props) {
 
                 <div className='mt-6 space-y-6 sm:mt-5 sm:space-y-5'>
                   <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+
+                    <label
+                      htmlFor='Theme'
+                      className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
+                      Theme
+                    </label>
+                    <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                      <div className='flex max-w-lg'>
+                        <select className='w-full gastrobit-input' value={theme} onChange={e => setTheme(e.target.value)}>
+                          {themes.map((theme, index) => (<option key={index} value={theme}>{theme}</option>))}}
+                        </select>
+                      </div>
+
+                      <button className='mt-2 gastrobit-btn-primary' onClick={updateTheme}>Speichern</button>
+                    </div>
+
+                    <hr className='col-span-3' />
+
+
                     <label
                       htmlFor='subdomain'
                       className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>

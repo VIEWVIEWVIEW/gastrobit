@@ -56,12 +56,12 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
 
 function Page(props: PageProps) {
   const router = useRouter()
-  const { name, karte, extra_presets } = props.restaurant
+  const { name, karte, extra_presets, theme } = props.restaurant
 
   const cart = useCart()
 
   return (
-    <RestaurantLayout theme={'corporate'} restaurant={props.restaurant}>
+    <RestaurantLayout theme={theme || 'corporate'} restaurant={props.restaurant}>
       <div className='container mx-auto' suppressHydrationWarning>
         {/* If we are on a mobile device, we have two columns.
           On Desktop, we have a single column but with a floating action button
@@ -170,7 +170,7 @@ function GerichtModal({ gericht, open, setOpen }: { gericht: Gericht, open: bool
         </select>
 
         {/* Attribute */}
-        <h5 className='mt-5 font-bold'>Attribute</h5>
+        {gericht.extras ? <h5 className='mt-5 font-bold'>Attribute</h5> : null}
         {gericht.extras && gericht.extras.map((extra, index) => (
           <div className='flex flex-col mb-5' key={index}>
             <h6 className='font-semibold'>
@@ -305,7 +305,7 @@ function GerichtRow({ gericht }: { gericht: Gericht }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className='flex flex-row justify-between p-4 bg-neutral-content'>
+    <div className='flex flex-row justify-between p-4 bg-neutral text-neutral-content'>
       <div className='flex flex-col'>
         <h3 className='text-lg font-semibold'>{gericht.ueberschrift}</h3>
         <p className='text-sm'>{gericht.unterschrift}</p>
@@ -343,7 +343,7 @@ function Karte({ karte }: { karte: Karte }) {
         <p>Warenkorb</p>
         <div className='flex flex-col' suppressHydrationWarning>
           {cart.gerichte.map((gericht, index) => <WarenkorbRow gericht={gericht} key={index} index={index} karte={karte} />)}
-          {cart.gerichte.length > 0 ? <Link href='/checkout' className='btn btn-primary'>Bestellen für {calculateCartPrice()}€</Link> : <p className='text-sm'>Warenkorb ist leer</p>}
+          {cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Bestellen für {calculateCartPrice()}€</Link> : <p className='text-sm'>Warenkorb ist leer</p>}
 
         </div>
       </div>
@@ -375,7 +375,7 @@ function WarenkorbRow({ gericht, index, karte }: {
   }
 
   return <>
-    <div className='flex flex-row justify-between p-4 bg-neutral-content' suppressHydrationWarning>
+    <div className='flex flex-row justify-between p-4 bg-neutral text-neutral-content' suppressHydrationWarning>
       <div className='flex flex-col'>
         <h3 className='text-lg font-semibold'>{gericht.name} - <span className='text-sm'>
           {gericht.preis}€
