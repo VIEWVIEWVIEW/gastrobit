@@ -166,7 +166,7 @@ export default function GerichtsModal(props: Props) {
                             <div className='mt-1'>
                               <textarea
                                 rows={2}
-                                className='block w-full input'
+                                className='block w-full gastrobit-input'
                                 value={localGericht.unterschrift}
                                 onChange={e => setLocalGericht({ ...localGericht, unterschrift: e.target.value })}
                                 placeholder='mit Eisbergsalat, Tomaten, Gurken und Mais'
