@@ -242,7 +242,7 @@ function Restaurant({ restaurant, domains }: Props) {
                     <div className='mt-1 sm:mt-0 sm:col-span-2'>
                       <div className='flex max-w-lg'>
                         <select className='w-full gastrobit-input' value={theme} onChange={e => setTheme(e.target.value)}>
-                          {themes.map((theme, index) => (<option key={index} value={theme}>{theme}</option>))}}
+                          {themes.map((theme, index) => (<option key={index} value={theme}>{theme}</option>))}
                         </select>
                       </div>
 
