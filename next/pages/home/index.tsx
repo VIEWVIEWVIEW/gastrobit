@@ -181,7 +181,6 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
   )
 }
 
-
 const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: string | null }) => {
   const [domain, setDomain] = useState<string | undefined>(undefined)
   const supabase = useSupabaseClient<Database>()
