@@ -202,9 +202,22 @@ const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: strin
     fetchDomain()
   }, [supabase, id])
 
-  if (!subdomain) return <></>
+
+
+  const [useThisDomain, setUseThisDomain] = useState<string | null>(() => {
+    if (domain) return domain
+    if (subdomain) {
+      // replace "gastrobit.de" with value in .env
+      const newSubdomain = subdomain.replace('gastrobit.de', process.env.NEXT_PUBLIC_DOMAIN!)
+      return newSubdomain
+    }
+    return null
+  })
+
+  if (!useThisDomain) return <></>
+
   return <a
-    href={'https://' + subdomain + domain}
+    href={'https://' + useThisDomain}
     className='py-3 hover:text-gray-400 hover:underline'>
     Zur Website
   </a>
