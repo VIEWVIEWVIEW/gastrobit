@@ -181,7 +181,6 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
   )
 }
 
-
 const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: string | null }) => {
   const [domain, setDomain] = useState<string | undefined>(undefined)
   const supabase = useSupabaseClient<Database>()
@@ -217,7 +216,7 @@ const WebsiteLink = ({ id, subdomain }: { id: string | number, subdomain?: strin
   if (!useThisDomain) return <></>
 
   return <a
-    href={'https://' + useThisDomain}
+    href={'https://' + (subdomain ?? domain)}
     className='py-3 hover:text-gray-400 hover:underline'>
     Zur Website
   </a>
