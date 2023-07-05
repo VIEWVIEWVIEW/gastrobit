@@ -9,7 +9,7 @@ const ShoppingCart = <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox
 
 function FloatingActionButton({ }: Props) {
   return (
-    <button className='absolute p-4 bottom-10 right-10 btn btn-circle btn-info'>
+    <button className='hidden p-4 sm:absolute bottom-10 right-10 btn btn-circle btn-info'>
       {ShoppingCart}
     </button>
   )

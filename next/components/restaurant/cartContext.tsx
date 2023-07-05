@@ -1,7 +1,8 @@
+import { z } from 'zod';
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-type Gericht = {
+export type Gericht = {
   id: string | number;
   name: string;
   variante: string;
@@ -15,6 +16,29 @@ type Gericht = {
     }[];
   }[];
 }
+
+export const gerichtSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  name: z.string(),
+  variante: z.string(),
+  preis: z.number(),
+  extras: z.array(
+    z.object({
+      name: z.string(),
+      typ: z.union([z.literal("oneOf"), z.literal("manyOf")]),
+      items: z.array(
+        z.object({
+          name: z.string(),
+          preis: z.number()
+        })
+      )
+    })
+  )
+})
+
+export const gerichteSchema = z.array(gerichtSchema)
+
+
 
 interface CartState {
   gerichte: Gericht[];

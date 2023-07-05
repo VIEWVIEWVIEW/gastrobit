@@ -44,11 +44,36 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
   }
 }
 
+
+import { gerichtSchema } from '@/components/restaurant/cartContext'
+import { useEffect } from 'react'
+
 function Page(props: PageProps) {
   const router = useRouter()
   const { name, karte, extra_presets } = props.restaurant
 
   const cart = useCart()
+
+  useEffect(() => {
+    // validate state of cart
+    // if cart is empty, redirect to '/
+
+    if (cart.gerichte.length === 0) {
+      router.push('/')
+    }
+
+    // if cart is not empty, check if all items are valid
+    // if not, remove them from cart
+    cart.gerichte.forEach((gericht, index) => {
+      try {
+        gerichtSchema.parse(gericht)
+      } catch (error) {
+        console.error(error)
+
+      }
+    }
+    )
+  }, [cart, cart.gerichte, router])
 
   return (
     <RestaurantLayout theme={'corporate'} restaurant={props.restaurant}>
@@ -56,7 +81,7 @@ function Page(props: PageProps) {
         {/* If we are on a mobile device, we have two columns.
           On Desktop, we have a single column but with a floating action button
         */}
-
+        {cart.gerichte.length > 0 ? JSON.stringify(cart.gerichte) : "No items in cart"}
       </div>
 
     </RestaurantLayout>

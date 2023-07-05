@@ -348,7 +348,10 @@ function Karte({ karte }: { karte: Karte }) {
 
         </div>
       </div>
+
+
       <FloatingActionButton />
+
     </div>
   )
 }
