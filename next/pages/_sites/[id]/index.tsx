@@ -329,6 +329,14 @@ function Karte({ karte }: { karte: Karte }) {
     return cart.gerichte.reduce((acc, curr) => acc + curr.preis, 0)
   }
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  //Wait till NextJS rehydration completes
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+
   return (
     <div className='grid grid-cols-3 space-x-5'>
       <div className='flex flex-col col-span-3 md:col-span-2'>
@@ -340,23 +348,25 @@ function Karte({ karte }: { karte: Karte }) {
         </div>
       </div>
 
-      <div className='flex-col items-center justify-center h-screen mt-12 mb-8 text-2xl align-middle sm:hidden md:block'>
-        <p>Warenkorb</p>
-        <div className='flex flex-col' suppressHydrationWarning>
-          {cart.gerichte.map((gericht, index) => <WarenkorbRow gericht={gericht} key={index} index={index} karte={karte} />)}
-          {cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Bestellen für {calculateCartPrice()}€</Link> : <p className='text-sm'>Warenkorb ist leer</p>}
+      {isHydrated ? <>
+        <div className='flex-col items-center justify-center h-screen mt-12 mb-8 text-2xl align-middle sm:hidden md:block'>
+          <p>Warenkorb</p>
+          <div className='flex flex-col' suppressHydrationWarning>
+            {cart.gerichte.map((gericht, index) => <WarenkorbRow gericht={gericht} key={index} index={index} karte={karte} />)}
+            {cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Bestellen für {calculateCartPrice()}€</Link> : <p className='text-sm'>Warenkorb ist leer</p>}
 
+          </div>
         </div>
-      </div>
 
 
-      <FloatingActionButton />
+        <FloatingActionButton />
+      </> : null}
 
     </div>
   )
 }
 
-function WarenkorbRow({ gericht, index, karte }: {
+export function WarenkorbRow({ gericht, index, karte }: {
   karte: Karte,
   gericht: {
     id: string | number;
@@ -385,7 +395,7 @@ function WarenkorbRow({ gericht, index, karte }: {
         <h3 className='text-lg font-semibold'>{gericht.name} - <span className='text-sm'>
           {gericht.preis}€
         </span></h3>
-        <p className='text-sm'>{gericht.variante}</p>
+        <p className='text-sm capitalize'>{gericht.variante}</p>
         <div className='text-xs'><ExtrasText extras={gericht.extras} karte={karte} /></div>
       </div>
       <div className='flex flex-col'>

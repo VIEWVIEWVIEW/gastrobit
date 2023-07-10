@@ -36,7 +36,9 @@ function RestaurantLayout({
   return (
     <>
       <div data-theme={theme}>
-        <Navbar restaurantName={restaurant.name} />
+        <div className='container mx-auto'>
+          <Navbar restaurantName={restaurant.name} />
+        </div>
 
         <div
           className='flex flex-col justify-between min-h-screen '>
