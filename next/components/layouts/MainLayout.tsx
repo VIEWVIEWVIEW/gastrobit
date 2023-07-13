@@ -14,7 +14,7 @@ function MainLayout({
     <>
       <div><Toaster /></div>
       <div className='flex flex-col justify-between min-h-screen bg-sepia-300'>
-        <div>
+        <div className='flex flex-col grow'>
           <Navbar />
           {children}
         </div>

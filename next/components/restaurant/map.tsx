@@ -1,3 +1,6 @@
+/** 
+ * 
+
 import { MapContainer, TileLayer, useMap, Marker, Popup, MapContainerProps, Polygon, useMapEvents } from 'react-leaflet'
 
 import 'leaflet/dist/leaflet.css'
@@ -16,7 +19,7 @@ const Map = (props: Props) => {
   const { containerProps } = props
 
   const [center, setCenter] = useState<[number, number]>([51.505, -0.09])
-
+  
   const [polygons, setPolygons] = useState<polygon[]>([
     {
       color: 'purple',
@@ -34,24 +37,24 @@ const Map = (props: Props) => {
       ],
     }
   ])
-
+  
   const [isSelected, setSelected] = useState<number>(-1)
-
+  
   return <>
-    <MapContainer {...containerProps} zoom={13} center={center} >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {polygons.map((polygon, index) => <DraggablePolygon key={index} polygon={polygon} polygons={polygons} setPolygons={setPolygons} isSelected={index === isSelected} setSelected={setSelected} />)}
-    </MapContainer>
+  <MapContainer {...containerProps} zoom={13} center={center} >
+  <TileLayer
+  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  />
+  {polygons.map((polygon, index) => <DraggablePolygon key={index} polygon={polygon} polygons={polygons} setPolygons={setPolygons} isSelected={index === isSelected} setSelected={setSelected} />)}
+  </MapContainer>
   </>
 }
 
 const DraggablePolygon = ({
   polygon,
   polygons,
-
+  
   setPolygons,
   isSelected,
   setSelected
@@ -63,16 +66,16 @@ const DraggablePolygon = ({
   setSelected: (index: number) => void
 }) => {
   const [draggable, setDraggable] = useState(true)
-
+  
   const map = useMapEvents({
     click: (e) => {
       if (isSelected && e.originalEvent.ctrlKey) {
-      
+        
         // add current point to polygon
         const currentLatLng = e.latlng
-  
+        
         const currentIndex = polygons.indexOf(polygon)
-  
+        
         const newPolygons = polygons.map((poly, index) => {
           if (index === currentIndex) {
             poly.vertices.push([currentLatLng.lat, currentLatLng.lng])
@@ -85,26 +88,26 @@ const DraggablePolygon = ({
       }
     }
   })
-
+  
   const mapReference = useMap()
-
-
-
-
+  
+  
+  
+  
   const toggleDraggable = () => {
     setDraggable(!draggable)
   }
-
+  
   const polyRef = useRef()
-
-
-
+  
+  
+  
   const eventHandlers = useMemo(
     () => ({
       dragend() {
         const polygon = polyRef.current
         if (polygon != null) {
-
+          
         }
       },
       dragstart() {
@@ -115,18 +118,19 @@ const DraggablePolygon = ({
       }
     }),
     [],
-  )
-
-  return (
-    <Polygon
+    )
+    
+    return (
+      <Polygon
       pathOptions={{ color: isSelected ? 'blue' : polygon.color }}
       positions={polygon.vertices}
       eventHandlers={eventHandlers}
       interactive={draggable}
       ref={polyRef}
-    />
+      />
   )
 }
 
 
 export default Map
+*/
