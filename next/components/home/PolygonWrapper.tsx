@@ -8,21 +8,21 @@ const POLYGON_ONE = [
   { longitude: 9.959793090820312, latitude: 53.59046705636403 },
   { longitude: 10.050430297851562, latitude: 53.58659505554131 },
   { longitude: 9.99927520751953, latitude: 53.61511726495334 },
-];
+]
 
 export const POLYGON_TWO = [
   { longitude: 9.936790466308594, latitude: 53.575588484564 },
   { longitude: 9.894561767578125, latitude: 53.54397962810946 },
   { longitude: 10.000648498535156, latitude: 53.550507262191466 },
   { longitude: 9.936790466308594, latitude: 53.575588484564 },
-];
+]
 
 export const POLYGON_THREE = [
   { longitude: 10.037727355957031, latitude: 53.58292651697834 },
   { longitude: 9.976272583007812, latitude: 53.576811578422124 },
   { longitude: 10.084762573242188, latitude: 53.53806309007896 },
   { longitude: 10.037727355957031, latitude: 53.58292651697834 },
-];
+]
 
 const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE];
 
@@ -32,10 +32,11 @@ import type { Coordinate } from '@freenow/react-polygon-editor/src/types';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 import { Database } from '@/types/supabase'
-import { useRouter } from 'next/router';
-import toast from 'react-hot-toast';
+import { useRouter } from 'next/router'
+import toast from 'react-hot-toast'
 
 type DeliveryArea = Database['public']['Tables']['restaurants']['Row']['delivery_area']
+
 
 export const PolygonWrapper = ({ initialPolygon }: { initialPolygon: DeliveryArea }) => {
   const router = useRouter()
@@ -48,7 +49,7 @@ export const PolygonWrapper = ({ initialPolygon }: { initialPolygon: DeliveryAre
         timeout: 5000,
       },
       userDecisionTimeout: 15000,
-    });
+    })
 
   const supabase = createBrowserSupabaseClient<Database>()
 
@@ -80,8 +81,7 @@ export const PolygonWrapper = ({ initialPolygon }: { initialPolygon: DeliveryAre
       loading: () => <p>A map is loading</p>,
       ssr: false // prevent SSR
     }
-  ), []);
-
+  ), [])
 
   const LiefergebietSpeichernButton = () => <button onClick={handlePolygonSave} className='w-full mt-4 gastrobit-btn-primary'>Liefergebiet speichern</button>
 
