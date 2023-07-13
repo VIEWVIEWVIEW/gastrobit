@@ -3,7 +3,7 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[]
 
 export interface Database {
@@ -46,9 +46,37 @@ export interface Database {
           }
         ]
       }
+      orders: {
+        Row: {
+          created_at: string
+          id: string
+          order: Json
+          order_status: string | null
+          payment_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order: Json
+          order_status?: string | null
+          payment_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order?: Json
+          order_status?: string | null
+          payment_status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       restaurants: {
         Row: {
           created_at: string | null
+          delivery_area: Json
           demo: boolean
           extra_presets: Json
           id: number
@@ -61,6 +89,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string | null
+          delivery_area?: Json
           demo?: boolean
           extra_presets?: Json
           id?: number
@@ -73,6 +102,7 @@ export interface Database {
         }
         Update: {
           created_at?: string | null
+          delivery_area?: Json
           demo?: boolean
           extra_presets?: Json
           id?: number
@@ -113,7 +143,14 @@ export interface Database {
       }
     }
     Enums: {
-      [_ in never]: never
+      stripe_status:
+        | "incomplete"
+        | "incomplete_expired"
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "canceled"
+        | "unpaid"
     }
     CompositeTypes: {
       [_ in never]: never
