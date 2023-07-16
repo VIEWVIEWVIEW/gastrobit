@@ -1,7 +1,6 @@
 import { useRouter } from "next/router"
 import useCart from "./cartContext"
 import { SubmitHandler, useForm } from "react-hook-form"
-import * as Nominatim from "nominatim-browser";
 
 import { Fragment, useEffect } from "react";
 import RestaurantLayout from "../layouts/RestaurantLayout";
@@ -87,39 +86,29 @@ function Page(props: PageProps) {
     // we also sent the full "karte", so we can check on the backend for a race-condition in case the restaurant changes the menu while the user is checking out
 
 
+    const result = await fetch('/api/checkout/create-order', {
+      method: 'POST',
+      body: JSON.stringify({
+        restaurantId: id,
+        address,
+        cart,
+        karte
+      }),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
 
-
-
-
-
+    const json = await result.json()
 
 
 
 
     // error handling
-    const result = await Nominatim.geocode({
-      q: `${address.strasse} ${address.plz} ${address.ort}`,
-      addressdetails: false,
-      limit: 1
-    })
 
-    if (result.length === 0) {
-      console.error("No results found")
-      return
-    }
 
-    const point = {
-      latitude: result[0].lat,
-      longitude: result[0].lon
-    }
 
-    const isInside = isCoordinateInPolygon(point, polygon)
-
-    console.log("is inside?", isInside)
-
-    console.log("point", point)
-
-    console.log("polygon", polygon)
 
   }
 
@@ -176,10 +165,10 @@ function Page(props: PageProps) {
 
             <div className="form-control">
               <label className="cursor-pointer label">
-                <input type="checkbox" className="shadow-sm checkbox"  />
+                <input type="checkbox" className="shadow-sm checkbox"  {...register('datenverarbeitung', { required: true })} />
                 <span>Ich stimme der Verarbeitung meiner Daten gemäß der <Link href={'/datenschutz'} className="link link-primary">Datenschutzerklärung</Link> zu. </span>
               </label>
-                {errors.email && <div className='text-red-500'>Ihre Einwilligung wird benötigt um Ihre Bestellung zu verarbeiten</div>}
+              {errors.datenverarbeitung && <div className='text-red-500'>Ihre Einwilligung wird benötigt um Ihre Bestellung zu verarbeiten</div>}
             </div>
             {/* cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Jetzt kostenpflichtig für {calculateCartPrice()}€ bestellen</Link> : <p className='text-sm'>Warenkorb ist leer</p> */}
             <button type='submit' className='btn btn-primary'>Kostenpflichtig bestellen für {calculateCartPrice()}€</button>

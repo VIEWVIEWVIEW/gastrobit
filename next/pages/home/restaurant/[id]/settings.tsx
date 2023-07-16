@@ -89,6 +89,7 @@ export interface GetDomainsAnswer {
 }
 
 import themes from '@/types/themes'
+import { Coordinate } from '@freenow/react-polygon-editor/src/types'
 
 function Restaurant({ restaurant, domains }: Props) {
   const router = useRouter()
@@ -160,7 +161,7 @@ function Restaurant({ restaurant, domains }: Props) {
 
     const { data, error } = await supabase
       .from('restaurants')
-      .update({ subdomain: `${gastrobitSubdomain}.gastrobit.de` })
+      .update({ subdomain: `${gastrobitSubdomain.toLowerCase()}.gastrobit.de` })
       .eq('id', restaurant.id)
 
     if (error) {
@@ -188,6 +189,7 @@ function Restaurant({ restaurant, domains }: Props) {
     }
   }
 
+  const deliveryArea = restaurant.delivery_area as Coordinate[]
 
 
 
@@ -251,6 +253,19 @@ function Restaurant({ restaurant, domains }: Props) {
 
                     <hr className='col-span-3' />
 
+                    <label
+                      htmlFor='Theme'
+                      className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
+                      Liefergebiet
+                    </label>
+                    <div className='mt-1 sm:mt-0 sm:col-span-1'>
+                      {deliveryArea.length < 1 && <p className='text-red-500'>Du hast noch kein Liefergebiet festgelegt.</p>
+                      }
+                      <Link className='col-start-2 mt-2 gastrobit-btn-primary' href={`/restaurant/${id}/delivery-area`}>Liefergebiet einsehen und ändern</Link>
+                    </div>
+
+                    <hr className='col-span-3' />
+
 
                     <label
                       htmlFor='subdomain'
@@ -258,6 +273,7 @@ function Restaurant({ restaurant, domains }: Props) {
                       Subdomain
                     </label>
                     <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                        {(gastrobitSubdomain.length < 1 && (domainList?.length || 0) < 1) && <p className='text-red-500'>Du musst mindestens eine Subdomain oder eine Customdomain festlegen, damit dein Restaurant über das Web besuchbar ist.</p>}
                       <div className='flex max-w-lg'>
                         <input
                           type='text'
