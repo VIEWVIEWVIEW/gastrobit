@@ -157,65 +157,66 @@ const handler: NextApiHandler = async function (req, res) {
     let total = 0
     gerichte.forEach(gericht => {
       total += gericht.preis
-      if (gericht.extras) {
-        Object.values(gericht.extras).forEach(extra => {
-          // find extra in restaurant.karte
-          const extraInKarte = restaurantKarte.extras.find(extraInKarte => extraInKarte.id === extra)
-        })
 
-
-
-    // create destination charge for the connect account of the restaurant
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: bestellung.total * 100,
-      currency: 'eur',
-      payment_method_types: ['card'],
-      automatic_payment_methods: {
-        enabled: true,
-      },
-      transfer_data: {
-        destination: restaurant.stripe_account_id,
-      },
-      metadata: {
-        restaurantId: restaurant.id,
-        restaurantName: restaurant.name,
-        addressOfCustomer: `${address.strasse} ${address.plz} ${address.ort}`,
-        bestellung: JSON.stringify(bestellung),
-        karte: JSON.stringify(karte),
-        email: address.email,
-        phone: address.handy
-      },
-    });
-
-    console.log("paymentIntent", paymentIntent)
-
-
-
-    return res.json({
-      order_id: 1337,
-      isEqual: isKarteUpToDate(karte, restaurant.karte as Karte),
     })
+    return total
   }
 
-  import { isEqual } from "lodash";
-
-  function isKarteUpToDate(uploadedKarte: Karte, restaurantKarte: Karte) {
-    // exit guards
-    if (!uploadedKarte || !restaurantKarte) {
-      return false;
-    }
-
-    if (uploadedKarte.length !== restaurantKarte.length) {
-      return false;
-    }
+  const total = calculateTotal(gerichte)
 
 
 
-    // compare if uploadedKarte and resutaurantKarte and all their nested child objects and arrays and so on are equal
-    return isEqual(uploadedKarte, restaurantKarte)
+  // create destination charge for the connect account of the restaurant
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: total * 100,
+    currency: 'eur',
+    payment_method_types: ['card'],
+    automatic_payment_methods: {
+      enabled: true,
+    },
+    transfer_data: {
+      destination: restaurant.stripe_account_id,
+    },
+    metadata: {
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+      addressOfCustomer: `${address.strasse} ${address.plz} ${address.ort}`,
+      bestellung: JSON.stringify(bestellung),
+      karte: JSON.stringify(karte),
+      email: address.email,
+      phone: address.handy
+    },
+  });
+
+  console.log("paymentIntent", paymentIntent)
+
+
+
+  return res.json({
+    order_id: 1337,
+    isEqual: isKarteUpToDate(karte, restaurant.karte as Karte),
+  })
+}
+
+import { isEqual } from "lodash";
+
+function isKarteUpToDate(uploadedKarte: Karte, restaurantKarte: Karte) {
+  // exit guards
+  if (!uploadedKarte || !restaurantKarte) {
+    return false;
+  }
+
+  if (uploadedKarte.length !== restaurantKarte.length) {
+    return false;
   }
 
 
 
+  // compare if uploadedKarte and resutaurantKarte and all their nested child objects and arrays and so on are equal
+  return isEqual(uploadedKarte, restaurantKarte)
+}
 
-  export default handler;
+
+
+
+export default handler;
