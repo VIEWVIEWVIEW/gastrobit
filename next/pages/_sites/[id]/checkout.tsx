@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next'
 import useCart from '@/components/restaurant/cartContext'
 import Link from 'next/link'
 import type { ParsedUrlQuery } from "querystring"
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs/dist'
 import { Database } from '@/types/supabase'
 
 import RestaurantLayout from '@/components/layouts/RestaurantLayout'

@@ -29,7 +29,7 @@ const SAMPLES: Coordinate[][] = [POLYGON_ONE, POLYGON_TWO, POLYGON_THREE];
 import { useGeolocated } from "react-geolocated";
 
 import type { Coordinate } from '@freenow/react-polygon-editor/src/types';
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs/dist';
 
 import { Database } from '@/types/supabase'
 import { useRouter } from 'next/router'

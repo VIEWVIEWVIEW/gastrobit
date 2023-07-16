@@ -1,6 +1,6 @@
 import { stripe } from "@/stripe";
 import { Database } from "@/types/supabase";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs/dist";
 import { NextApiHandler } from "next";
 
 const handler: NextApiHandler = async function (req, res) {
@@ -27,11 +27,11 @@ const handler: NextApiHandler = async function (req, res) {
 
 
   // get params for new express stripe acc
-  const { restaurantId } = req.query;
+  const { restaurantId, address, bestellung } = req.body;
 
-  const { data: restaurant, error } = await supabase.from('restaurants').select('*').eq('id', restaurantId).eq('owner_id', userId).single();
+  const { data: restaurant, error } = await supabase.from('restaurants').select('*').eq('id', restaurantId).single();
 
-  console.log(userId, restaurantId, restaurant)
+
 
   if (error || !restaurant || !restaurant.stripe_account_id) {
     return res.status(400).json({
