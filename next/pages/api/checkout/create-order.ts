@@ -170,7 +170,6 @@ const handler: NextApiHandler = async function (req, res) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: total * 100,
     currency: 'eur',
-    payment_method_types: ['card'],
     automatic_payment_methods: {
       enabled: true,
     },
@@ -181,8 +180,6 @@ const handler: NextApiHandler = async function (req, res) {
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,
       addressOfCustomer: `${address.strasse} ${address.plz} ${address.ort}`,
-      bestellung: JSON.stringify(bestellung),
-      karte: JSON.stringify(karte),
       email: address.email,
       phone: address.handy
     },
