@@ -41,12 +41,9 @@ const handler: NextApiHandler = async function (req, res) {
 
 
 
-  // create express account
-  const account = await stripe.accounts.createLoginLink(
-    restaurant.stripe_account_id
-  );
-
-  return res.redirect(account.url)
+  return res.json({
+    order_id: 1337
+  })
 }
 
 

@@ -26,9 +26,22 @@ type PageProps = {
 import { isCoordinateInPolygon } from '@freenow/react-polygon-editor/src/helpers';
 import { Coordinate } from "@freenow/react-polygon-editor/src/types";
 
+// address types
+export type Address = {
+  name: string
+  strasse: string
+  plz: string // postleittahgl
+  ort: string
+  handy?: string // optional, aber wäre nice für rückrufe :)
+  email: string // rechnung und bestellbestätigung
+  datenverarbeitung: boolean // der kunde muss der datenverarbeitung zustimmen, da wir schauen müssen ob die adresse in der lieferzone ist
+  // dafür verwenden wir nominatim von openstreetmap, es wird die adresse in koordinaten umgewandelt und dann geschaut ob die koordinaten in der lieferzone sind
+  // email usw wird nicht weitergegeben, nur die adresse und unterliegt der openstreetmap datenschutzerklärung
+}
+
 function Page(props: PageProps) {
   const router = useRouter()
-  const { name, karte, extra_presets, delivery_area } = props.restaurant
+  const { name, karte, extra_presets, delivery_area, id } = props.restaurant
 
   const cart = useCart()
 
@@ -58,28 +71,42 @@ function Page(props: PageProps) {
   }
 
 
-  // address types
-  type Inputs = {
-    name: string
-    strasse: string
-    plz: string // postleittahgl
-    ort: string
-    handy?: string // optional, aber wäre nice für rückrufe :)
-    email: string // rechnung und bestellbestätigung
-  }
 
-  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>()
+
+  const { register, handleSubmit, formState: { errors } } = useForm<Address>()
 
 
 
   const polygon = delivery_area as Coordinate[]
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const onSubmit: SubmitHandler<Address> = async (address) => {
+    // ok, so we need to submit the following data:
+    // restaurantId
+    // address, email and all that jazz for the fullfillment of the order
+    // cart of what we want to order
+    // we also sent the full "karte", so we can check on the backend for a race-condition in case the restaurant changes the menu while the user is checking out
+
+
+
+
+
+
+
+
+
+
+
+    // error handling
     const result = await Nominatim.geocode({
-      q: `${data.strasse} ${data.plz} ${data.ort}`,
+      q: `${address.strasse} ${address.plz} ${address.ort}`,
       addressdetails: false,
       limit: 1
     })
+
+    if (result.length === 0) {
+      console.error("No results found")
+      return
+    }
 
     const point = {
       latitude: result[0].lat,
@@ -114,28 +141,28 @@ function Page(props: PageProps) {
           <h2 className='my-3 text-xl font-bold'>Lieferadresse</h2>
           <form onSubmit={handleSubmit(onSubmit)} className='gap-3 form-control'>
             <div className='flex flex-col'>
-              <label htmlFor='name'>Name</label>
-              <input className='input input-bordered input-secondary' type='text' {...register('name', { required: true })} />
+              <label htmlFor='name'><b>Name</b> auf der Klingel</label>
+              <input className='input input-bordered input-secondary' type='text' autoComplete="name" {...register('name', { required: true })} />
               {errors.name && <span className='text-red-500'>Name ist ein Pflichtfeld</span>}
             </div>
             <div className='flex flex-col'>
-              <label htmlFor='strasse'>Straße</label>
-              <input className='input input-bordered input-secondary' type='text' {...register('strasse', { required: true })} />
-              {errors.strasse && <span className='text-red-500'>Straße ist ein Pflichtfeld</span>}
+              <label htmlFor='strasse'><b>Straße</b> und <b>Hausnummer</b></label>
+              <input className='input input-bordered input-secondary' type='text' autoComplete="street-address" {...register('strasse', { required: true })} />
+              {errors.strasse && <span className='text-red-500'>Straße & Hausnummer ist ein Pflichtfeld</span>}
             </div>
             <div className='flex flex-col'>
-              <label htmlFor='plz'>Postleitzahl</label>
-              <input className='input input-bordered input-secondary' type='text' {...register('plz', { required: true })} />
+              <label htmlFor='plz'><b>Postleitzahl</b></label>
+              <input className='input input-bordered input-secondary' type='text' autoComplete="postal-code" {...register('plz', { required: true })} />
               {errors.plz && <span className='text-red-500'>Postleitzahl ist ein Pflichtfeld</span>}
             </div>
             <div className='flex flex-col'>
-              <label htmlFor='ort'>Ort</label>
-              <input className='input input-bordered input-secondary' type='text' {...register('ort', { required: true })} />
+              <label htmlFor='ort'><b>Ort</b></label>
+              <input className='input input-bordered input-secondary' type='text' autoComplete="address-level2" {...register('ort', { required: true })} />
               {errors.ort && <span className='text-red-500'>Ort ist ein Pflichtfeld</span>}
             </div>
             <div className='flex flex-col'>
-              <label htmlFor='email'>Email (für Rechnung und Bestellbestätigung)</label>
-              <input className='input input-bordered input-secondary' type='email' {...register('email', { required: true })} />
+              <label htmlFor='email'><b>Email</b> (für Rechnung und Bestellbestätigung)</label>
+              <input className='input input-bordered input-secondary' type='email' autoComplete="email" {...register('email', { required: true })} />
               {errors.email && <span className='text-red-500'>Email ist ein Pflichtfeld</span>}
             </div>
             <div className='flex flex-col'>
@@ -146,8 +173,16 @@ function Page(props: PageProps) {
               </label>
               <input className='input input-bordered input-secondary' type='tel' {...register('handy')} />
             </div>
+
+            <div className="form-control">
+              <label className="cursor-pointer label">
+                <input type="checkbox" className="shadow-sm checkbox"  />
+                <span>Ich stimme der Verarbeitung meiner Daten gemäß der <Link href={'/datenschutz'} className="link link-primary">Datenschutzerklärung</Link> zu. </span>
+              </label>
+                {errors.email && <div className='text-red-500'>Ihre Einwilligung wird benötigt um Ihre Bestellung zu verarbeiten</div>}
+            </div>
             {/* cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Jetzt kostenpflichtig für {calculateCartPrice()}€ bestellen</Link> : <p className='text-sm'>Warenkorb ist leer</p> */}
-            <button type='submit' className='btn btn-primary'>Kostenpflicht Bestellen für {calculateCartPrice()}€</button>
+            <button type='submit' className='btn btn-primary'>Kostenpflichtig bestellen für {calculateCartPrice()}€</button>
           </form>
         </div>
 
