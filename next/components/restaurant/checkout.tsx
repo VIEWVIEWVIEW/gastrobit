@@ -5,7 +5,7 @@ import { SubmitHandler, useForm } from "react-hook-form"
 import { Fragment, useEffect } from "react";
 import RestaurantLayout from "../layouts/RestaurantLayout";
 import { WarenkorbRow } from "@/pages/_sites/[id]";
-import { Karte } from "@/types/schema";
+import { Extras, Karte } from "@/types/schema";
 import Link from "next/link";
 import { Database } from "@/types/supabase";
 import { ParsedUrlQuery } from "querystring";
@@ -78,6 +78,37 @@ function Page(props: PageProps) {
 
   const polygon = delivery_area as Coordinate[]
 
+
+
+  // we need to decode the extras which are encoded as numbers in an array in case of ManyOf and a single number in case of OneOf
+  // [1, 4] => "Käse, Tomaten"
+  function ExtrasText({ extras, karte }: { extras: Extras, karte: Karte }) {
+    const resolveManyOf = (arr: number[], key: string) => {
+      const extra = karte.flatMap(category => category.gerichte).flatMap(gericht => gericht.extras).find(extra => extra?.name === key)
+      if (extra) {
+        return arr.map(index => extra.items[index].name).join(', ')
+      }
+    }
+
+    // This  merges the extras ALL extras (oneOf and manyOf) into a single array
+    return Object.keys(extras).map((key: any) => (
+      // check if it's a manyOf array or not
+      Array.isArray(extras[key]
+      )
+        ?
+        // manyOf case
+        // @ts-ignore
+        resolveManyOf(extras[key], key)
+        :
+        // oneOf case
+        extras[key]))
+      // join the array into a single string
+      .join(', ')
+  }
+
+
+
+
   const onSubmit: SubmitHandler<Address> = async (address) => {
     // ok, so we need to submit the following data:
     // restaurantId
@@ -85,13 +116,17 @@ function Page(props: PageProps) {
     // cart of what we want to order
     // we also sent the full "karte", so we can check on the backend for a race-condition in case the restaurant changes the menu while the user is checking out
 
+    // console log each gericht with the extras. use ExtrasText to resolve the extras
+
+
+    const cartCopy = cart.gerichte.map(gericht => ({ ...gericht, extras: ExtrasText({ extras: gericht.extras, karte: karte as Karte }) }))
 
     const result = await fetch('/api/checkout/create-order', {
       method: 'POST',
       body: JSON.stringify({
         restaurantId: id,
         address,
-        cart,
+        cart: cartCopy,
         karte
       }),
       credentials: 'include',

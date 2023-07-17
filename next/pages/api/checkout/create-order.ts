@@ -151,7 +151,7 @@ const handler: NextApiHandler = async function (req, res) {
     }
   }
 
-  const { gerichte } = cart
+  const gerichte = cart
 
   const calculateTotal = (gerichte: Gericht[]) => {
     let total = 0
@@ -164,25 +164,40 @@ const handler: NextApiHandler = async function (req, res) {
 
   const total = calculateTotal(gerichte)
 
+  const lineItems = (gerichte: Gericht[]) => {
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = []
+    gerichte.forEach(gericht => {
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          unit_amount: gericht.preis * 100,
+          currency: 'eur',
+          product_data: {
+            name: gericht.name,
+            description: `${gericht.variante} + ${JSON.stringify(gericht.extras)}`,
+            metadata: {
+              restaurantId: restaurant.id,
+              variante: gericht.variante,
+              extras: gericht.extras ? JSON.stringify(gericht.extras) : "keine extras",
+            },
+          },
+        },
+      })
+    })
+    return lineItems
+  }
+
 
 
   // create destination charge for the connect account of the restaurant
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: total * 100,
+  const paymentIntent = await stripe.checkout.sessions.create({
     currency: 'eur',
-    automatic_payment_methods: {
-      enabled: true,
-    },
-    transfer_data: {
-      destination: restaurant.stripe_account_id,
-    },
-    metadata: {
-      restaurantId: restaurant.id,
-      restaurantName: restaurant.name,
-      addressOfCustomer: `${address.strasse} ${address.plz} ${address.ort}`,
-      email: address.email,
-      phone: address.handy
-    },
+    line_items: lineItems(gerichte),
+    payment_method_types: ['card', 'sofort', 'giropay', 'klarna'],
+    mode: 'payment',
+    success_url: 'https://gastrobit.de/erfolgreich',
+    customer_email: address.email,
+    submit_type: 'pay',    
   });
 
   console.log("paymentIntent", paymentIntent)
@@ -196,6 +211,7 @@ const handler: NextApiHandler = async function (req, res) {
 }
 
 import { isEqual } from "lodash";
+import Stripe from "stripe";
 
 function isKarteUpToDate(uploadedKarte: Karte, restaurantKarte: Karte) {
   // exit guards
@@ -207,9 +223,7 @@ function isKarteUpToDate(uploadedKarte: Karte, restaurantKarte: Karte) {
     return false;
   }
 
-
-
-  // compare if uploadedKarte and resutaurantKarte and all their nested child objects and arrays and so on are equal
+  // deep equal from lodash
   return isEqual(uploadedKarte, restaurantKarte)
 }
 
