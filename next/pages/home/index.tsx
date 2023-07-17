@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] })
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import MainLayout from '@/components/layouts/MainLayout'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Database } from '@/types/supabase'
 import Link from 'next/link'
 
@@ -56,8 +56,8 @@ const RestaurantList = () => {
 
   const [restaurants, setRestaurants] = useState<Restaurants[]>([])
 
-  useEffect(() => {
-    const fetchRestaurants = async () => {
+  const fetchRestaurants = useCallback(
+    async () => {
       const { data: userData, error: userError } = await supabase.auth.getUser()
 
       if (userError) return console.log('error', userError)
@@ -70,10 +70,13 @@ const RestaurantList = () => {
 
       if (error) console.log('error', error)
       else setRestaurants(restaurants)
-    }
+    },
+    [supabase],
+  )
 
+  useEffect(() => {
     fetchRestaurants()
-  }, [supabase])
+  }, [supabase, fetchRestaurants])
 
   return (
     <>

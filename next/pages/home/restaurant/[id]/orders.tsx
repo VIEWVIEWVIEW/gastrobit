@@ -4,7 +4,7 @@ import { createBrowserSupabaseClient, createServerSupabaseClient } from '@supaba
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 
 
@@ -51,12 +51,28 @@ type Order = Database['public']['Tables']['orders']['Row']
 function Page(props: Props) {
   const router = useRouter()
   const { id } = router.query
-  
+
   const restaurant = props.restaurant
-  
+
   const supabase = useSupabaseClient()
   const [orders, setOrders] = useState<Order[]>([])
 
+  const fetchOrders = useCallback(
+    async () => {
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select()
+        .eq('restaurand_id', id)
+        .order('created_at', { ascending: false })
+  
+      if (error) return console.log(error)
+      if (!orders) return console.log('no orders')
+  
+      setOrders(orders)
+    },
+    [supabase, id],
+  )
+  
   // do realtime updates for orders
   useEffect(() => {
     const subscription = supabase.channel(`restaurants:id=eq.${id}`).on('postgres_changes', {
@@ -68,25 +84,13 @@ function Page(props: Props) {
     })
       .subscribe((status) => console.log(status))
 
-      const fetchOrders = async () => {
-        const { data: orders, error } = await supabase
-          .from('orders')
-          .select()
-          .eq('restaurand_id', id)
-          .order('created_at', { ascending: false })
-          
-        if (error) return console.log(error)
-        if (!orders) return console.log('no orders')
 
-        setOrders(orders)
-      }
-
-      fetchOrders()
+    fetchOrders()
 
     return () => {
       supabase.removeChannel(subscription)
     }
-  }, [id, supabase])
+  }, [id, supabase, fetchOrders])
 
 
   return (
@@ -162,7 +166,7 @@ function Page(props: Props) {
                           </a>
                         </td>
                         <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-b
+                          b
                         </td>
                       </tr>
                     ))}
