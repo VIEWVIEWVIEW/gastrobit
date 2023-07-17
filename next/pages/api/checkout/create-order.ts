@@ -174,7 +174,7 @@ const handler: NextApiHandler = async function (req, res) {
           currency: 'eur',
           product_data: {
             name: gericht.name,
-            description: `${gericht.variante} + ${JSON.stringify(gericht.extras)}`,
+            description: `${gericht.variante} ${gericht.extras ? JSON.stringify(gericht.extras) : ""}`,
             metadata: {
               restaurantId: restaurant.id,
               variante: gericht.variante,

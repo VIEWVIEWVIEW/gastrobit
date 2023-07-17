@@ -69,17 +69,14 @@ function Page(props: PageProps) {
     return cart.gerichte.reduce((acc, curr) => acc + curr.preis, 0)
   }
 
-
-
-
+  // form handlers
   const { register, handleSubmit, formState: { errors } } = useForm<Address>()
 
 
-
+  // cast delivery area to Coordinate[]
   const polygon = delivery_area as Coordinate[]
 
-
-
+  // cart stuff
   // we need to decode the extras which are encoded as numbers in an array in case of ManyOf and a single number in case of OneOf
   // [1, 4] => "Käse, Tomaten"
   function ExtrasText({ extras, karte }: { extras: Extras, karte: Karte }) {
@@ -105,9 +102,6 @@ function Page(props: PageProps) {
       // join the array into a single string
       .join(', ')
   }
-
-
-
 
   const onSubmit: SubmitHandler<Address> = async (address) => {
     // ok, so we need to submit the following data:
