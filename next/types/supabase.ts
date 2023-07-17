@@ -48,30 +48,49 @@ export interface Database {
       }
       orders: {
         Row: {
+          address: string
+          checkout_link: string | null
           created_at: string
+          email: string
           id: string
           order: Json
           order_status: string | null
           payment_status: string | null
+          restaurand_id: number
           updated_at: string
         }
         Insert: {
+          address: string
+          checkout_link?: string | null
           created_at?: string
-          id?: string
+          email: string
+          id: string
           order: Json
           order_status?: string | null
           payment_status?: string | null
+          restaurand_id: number
           updated_at?: string
         }
         Update: {
+          address?: string
+          checkout_link?: string | null
           created_at?: string
+          email?: string
           id?: string
           order?: Json
           order_status?: string | null
           payment_status?: string | null
+          restaurand_id?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_restaurand_id_fkey"
+            columns: ["restaurand_id"]
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       restaurants: {
         Row: {

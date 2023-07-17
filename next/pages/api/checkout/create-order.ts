@@ -47,7 +47,7 @@ const handler: NextApiHandler = async function (req, res) {
   } = await supabase.auth.getSession()
 
   // get params for new express stripe acc
-  const { restaurantId, address, karte, cart } = req.body;
+  const { restaurantId, address, karte, cart, host } = req.body;
 
   console.log("restaurantId", restaurantId)
 
@@ -105,64 +105,8 @@ const handler: NextApiHandler = async function (req, res) {
     });
   }
 
-  // calculate total
-  const exampleCart = {
-    "cart": {
-      "gerichte": [
-        {
-          "extras": {
-            "Ihre Burgersoße": "Ketchup"
-          },
-          "id": "6a88261c-4fff-4275-91d4-1b0cc108c6bb",
-          "name": "Cheeseburger",
-          "preis": 7.5,
-          "variante": "standard"
-        },
-        {
-          "extras": {
-            "Ihr Dressing": "French Dressing"
-          },
-          "id": 3,
-          "name": "Gemischter Salat",
-          "preis": 7.5,
-          "variante": "standard"
-        },
-        {
-          "extras": {},
-          "id": "a237e9fe-2f2d-4ede-8fa7-39dd58aabfbd",
-          "name": "Eisbergsalat",
-          "preis": 7.5,
-          "variante": "standard"
-        },
-        {
-          "extras": {
-            "Ihre Pizzaaextras": [
-              1,
-              3
-            ],
-            "Ihre Pizzasoße": "Hollondaise"
-          },
-          "id": "lol",
-          "name": "Pizza Prosciutto ",
-          "preis": 11,
-          "variante": "groß (30cm)"
-        }
-      ]
-    }
-  }
-
+  // reassignment bc i i did some refactoring without thinking and am too lazy to clean up :))
   const gerichte = cart
-
-  const calculateTotal = (gerichte: Gericht[]) => {
-    let total = 0
-    gerichte.forEach(gericht => {
-      total += gericht.preis
-
-    })
-    return total
-  }
-
-  const total = calculateTotal(gerichte)
 
   const lineItems = (gerichte: Gericht[]) => {
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = []
@@ -195,18 +139,41 @@ const handler: NextApiHandler = async function (req, res) {
     line_items: lineItems(gerichte),
     payment_method_types: ['card', 'sofort', 'giropay', 'klarna'],
     mode: 'payment',
-    success_url: 'https://gastrobit.de/erfolgreich',
+    success_url: `http://${host}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     customer_email: address.email,
     submit_type: 'pay',    
   });
 
-  console.log("paymentIntent", paymentIntent)
 
+  console.debug("paymentIntent", paymentIntent)
 
+  // create order in supabase
+  const { data: orderRes, error: orderError } = await supabase.from('orders').insert({
+    order: cart,
+    address: `${address.name}, ${address.strasse}, ${address.plz} ${address.ort} ${address.handy}`,
+    email: address.email,
+    restaurand_id: restaurant.id,
+    checkout_link: paymentIntent.url,
+    order_status: "pending",
+    payment_status: "pending",
+    id: paymentIntent.id,
+  }).single()
+
+  if (orderError) {
+    console.error(error)
+    return res.status(400).json({
+      error: orderError.details
+    });
+  }
 
   return res.json({
-    order_id: 1337,
-    isEqual: isKarteUpToDate(karte, restaurant.karte as Karte),
+    address: `${address.name}, ${address.strasse}, ${address.plz} ${address.ort} ${address.handy}`,
+    email: address.email,
+    restaurand_id: restaurant.id,
+    checkout_link: paymentIntent.url,
+    order_status: "pending",
+    payment_status: "pending",
+    id: paymentIntent.id,
   })
 }
 

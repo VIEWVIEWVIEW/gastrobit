@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import useCart from "./cartContext"
-import { SubmitHandler, useForm } from "react-hook-form"
+import { SubmitHandler, set, useForm } from "react-hook-form"
 
 import { Fragment, useEffect, useState } from "react";
 import RestaurantLayout from "../layouts/RestaurantLayout";
@@ -24,6 +24,8 @@ type PageProps = {
 
 import { isCoordinateInPolygon } from '@freenow/react-polygon-editor/src/helpers';
 import { Coordinate } from "@freenow/react-polygon-editor/src/types";
+import { BeatLoader } from "react-spinners";
+import toast from "react-hot-toast";
 
 // address types
 export type Address = {
@@ -100,10 +102,14 @@ function Page(props: PageProps) {
     // cart of what we want to order
     // we also sent the full "karte", so we can check on the backend for a race-condition in case the restaurant changes the menu while the user is checking out
 
-    // console log each gericht with the extras. use ExtrasText to resolve the extras
-
+    // set loading state
+    setIsSubmitting(true)
 
     const cartCopy = cart.gerichte.map(gericht => ({ ...gericht, extras: ExtrasText({ extras: gericht.extras, karte: karte as Karte }) }))
+
+    // get current host
+    const host = window.location.host
+
 
     const result = await fetch('/api/checkout/create-order', {
       method: 'POST',
@@ -111,7 +117,8 @@ function Page(props: PageProps) {
         restaurantId: id,
         address,
         cart: cartCopy,
-        karte
+        karte,
+        host
       }),
       credentials: 'include',
       headers: {
@@ -121,20 +128,20 @@ function Page(props: PageProps) {
 
     const json = await result.json()
 
+    setIsSubmitting(false)
 
-
-
-    // error handling
-
-
-
-
+    if (json.checkout_link) {
+      router.push(json.checkout_link)
+    } else {
+      toast.error('Es ist ein Fehler aufgetreten. Bitte versuche es erneut.')
+      console.error(json)
+    }
   }
 
 
   return (
     <RestaurantLayout theme={'corporate'} restaurant={props.restaurant}>
-      <div className='container grid grid-cols-2 gap-3 mx-auto' suppressHydrationWarning>
+      <div className='container grid grid-cols-1 gap-3 mx-auto md:grid-cols-2' suppressHydrationWarning>
         <div>
           <h2 className='my-3 text-xl font-bold'>Einkaufswagen</h2>
           {/* If we are on a mobile device, we have two columns.
@@ -184,19 +191,18 @@ function Page(props: PageProps) {
 
             <div className="form-control">
               <label className="cursor-pointer label">
-                <input type="checkbox" className="shadow-sm checkbox"  {...register('datenverarbeitung', { required: true })} />
+                <input type="checkbox" className="mr-2 shadow-sm checkbox"  {...register('datenverarbeitung', { required: true })} />
                 <span>Ich stimme der Verarbeitung meiner Daten gemäß der <Link href={'/datenschutz'} className="link link-primary">Datenschutzerklärung</Link> zu. </span>
               </label>
               {errors.datenverarbeitung && <div className='text-red-500'>Ihre Einwilligung wird benötigt um Ihre Bestellung zu verarbeiten</div>}
             </div>
             {/* cart.gerichte.length > 0 ? <Link href='/checkout' className='mt-3 btn btn-primary'>Jetzt kostenpflichtig für {calculateCartPrice()}€ bestellen</Link> : <p className='text-sm'>Warenkorb ist leer</p> */}
-            <button type='submit' className='btn btn-primary'>Kostenpflichtig bestellen für {calculateCartPrice()}€</button>
+            <button type='submit' className='btn btn-primary'
+              disabled={isSubmitting}
+            >Kostenpflichtig bestellen für {calculateCartPrice()}€ {isSubmitting && <BeatLoader className="white" />}</button>
           </form>
         </div>
-
-
       </div>
-
     </RestaurantLayout>
   )
 }
