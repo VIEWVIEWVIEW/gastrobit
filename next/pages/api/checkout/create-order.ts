@@ -210,7 +210,7 @@ const handler: NextApiHandler = async function (req, res) {
   })
 }
 
-import { isEqual } from "lodash";
+import { isEqual } from "lodash-es";
 import Stripe from "stripe";
 
 function isKarteUpToDate(uploadedKarte: Karte, restaurantKarte: Karte) {

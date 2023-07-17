@@ -2,7 +2,7 @@ import { useRouter } from "next/router"
 import useCart from "./cartContext"
 import { SubmitHandler, useForm } from "react-hook-form"
 
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import RestaurantLayout from "../layouts/RestaurantLayout";
 import { WarenkorbRow } from "@/pages/_sites/[id]";
 import { Extras, Karte } from "@/types/schema";
@@ -44,24 +44,14 @@ function Page(props: PageProps) {
 
   const cart = useCart()
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   useEffect(() => {
-    // validate state of cart
-    // if cart is empty, redirect to '/
+    // if cart is empty, redirect to '/'
     if (cart.gerichte.length === 0) {
       router.push('/')
     }
-
-    // if cart is not empty, check if all items are valid
-    // if not, remove them from cart
-    cart.gerichte.forEach((gericht, index) => {
-      try {
-
-
-      } catch (error) {
-
-      }
-    }
-    )
   }, [cart, cart.gerichte, router])
 
   // calculate total price of cart
