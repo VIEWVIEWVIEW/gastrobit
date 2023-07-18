@@ -10,13 +10,15 @@
 
 Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombination aus Marktforschung und einem Gastronomeninterview ermittelt. Die Hauptanforderungen sind:
 
-- Benutzerfreundliche Oberfläche
+- Benutzerfreundliche Oberfläche für den ENdkunden
 - Responsive Design für mobile Endgeräte beim Kaufvorgang durch Endkunden
 - Einfache Bestellprozesse für den Endkunden
-- Bezahlungsfunktion
+- Bezahlungsfunktion für den Endkunden
 - Restaurantverwaltung durch den Besitzer (Speisekarte, Erreichbarkeit über eigene Domain/\*.gastrobit.de-Subdomain, Auswahl eines Designs, Festlegung des Liefergebietes, etc.)
 - Tracking und Verwaltung des Bestellvorgangs
 - Niedrige Kommissionen für Gastronomen
+
+![Use Case Diagramm für Gastronomen und Endnutzer](usecasediagram.png)
 
 ## 2. Identifikation der Anwendungsfälle des Softwareprodukts
 
