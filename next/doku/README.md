@@ -18,13 +18,16 @@ Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombin
 - Tracking und Verwaltung des Bestellvorgangs
 - Niedrige Kommissionen für Gastronomen
 
-## Identifikation der Anwendungsfälle des Softwareprodukts
 
-![Use Case Diagramm für Gastronomen und Endnutzer](usecasediagram.png)
 
 ## 2. Identifikation der Anwendungsfälle des Softwareprodukts
 
-Die Anwendungsfälle für unser Produkt wurden identifiziert und in einem Use Case Diagramm dargestellt. Die Hauptanwendungsfälle sind:
+Die Anwendungsfälle für unser Produkt wurden identifiziert und in einem Use Case Diagramm dargestellt.
+
+
+![Use Case Diagramm für Gastronomen und Endnutzer](usecasediagram.png)
+
+Die Hauptanwendungsfälle sind:
 
 - Registrierung, Login, Passwort zurücksetzen sowie E-Mail ändern für Gastronomen
 - Hinzufügen und Verwalten von Restaurants durch den Gastronomen
@@ -34,23 +37,8 @@ Die Anwendungsfälle für unser Produkt wurden identifiziert und in einem Use Ca
 - Bezahlung der Bestellung durch Endkunden
 - Verwaltung der Bestellung durch den Gastronomen
 
-```mermaid
-sequenceDiagram
-    autonumber
 
-    participant Kunde
-    participant Gastrobit
-    participant Restaurant
 
-    Kunde->>Gastrobit: Durchsucht Restaurants
-    Gastrobit->>Kunde: Zeigt verfügbare Restaurants
-    Kunde->>Gastrobit: Wählt Restaurant und Speisen aus
-    Gastrobit->>Kunde: Zeigt Bestellübersicht
-    Kunde->>Gastrobit: Bezahlt Bestellung
-    Gastrobit->>Restaurant: Sendet Bestellung
-    Restaurant->>Gastrobit: Aktualisiert Bestellstatus
-    Gastrobit->>Kunde: Zeigt Bestellstatus
-```
 
 ## Entwurf einer Benutzungsoberfläche für das Produkt
 
@@ -508,6 +496,8 @@ Außerdem können Sie hier die Extra-Attribute aus ihren Presets hinzufügen. Ei
 ![Extras](extra-presets.png)
 
 Wenn Sie fertig sind, klicken Sie auf "Ändern", und anschließend auf "Speichern" am Ende der Seite.
+
+###
 
 Falls Sie weitere Fragen haben, kontaktieren Sie unseren Support unter richts.marc-alexander@fh-swf.de.
 
