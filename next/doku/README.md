@@ -81,6 +81,12 @@ Wir hatten mehrere Ansätze um ein Liefergebiet zu definieren.
 
 1. **Radius um das Restaurant.** Dies wäre der simpelste Ansatz gewesen, jedoch fallen hier schnell die Limitierungen dieser unflexiblen Lösung auf: Nehmen wir einfach die Stadt Hamburg, die durch die Elbe horizontal getrennt ist. Ein Gastronom möchte beispielsweise in Hamburg nur den nördlichen Teil der Elbe bedinenen, da eine Fahrt durch den Elbtunnel für den Lieferanten zu lange dauert. Ein primitiver Radius würde dies nicht ermöglichen.
 
+2. **Postleitzahlen.** Ein ähnliches Gebiet wie bei dem Radius: Postleitzahlengebiete sind teilweise sehr groß und können Gebiete abdecken, die durch große Hindernisse (wie der oben beschriebene Elbtunnel) geographisch getrennt sind. Außerdem war es mir nicht möglich, eine Datenbank mit Postleitzahlen zu finden, die auch die Koordinaten der Postleitzahlen enthält.
+
+3. **Polygon.** Ein Polygon ist ein geschlossenes Gebiet, welches durch Koordinaten definiert wird. Dies ermöglicht es, sehr komplexe Gebiete zu definieren, die auch natürliche Hindernisse wie Flüsse oder Autobahnen berücksichtigen. *Für diesen Ansatz habe ich sehr viel Zeit benötigt, und wollte zuerst um Leaflet.js einen Wrapper schreiben, habe jedoch nach einigen Tagen die tolle Library "react-polygon-editor" vom Hamburger Taxiunternehmen "Freenow" gefunden. Beim Bestellprozess wird nun OpenStreetMaps.com mit der Adresse des Kunden kontaktiert, diese Adresse wird zu Koordinaten aufgelöst, und dann wird mit der Hilfe des "Point Inclusion in Polygon Test"-Algortihmus festgestellt, ob sich dieser Punkt im Polygon befindet. **Dies ist die finale Lösung, die in diesem Projekt verwendet wurde**. 
+
+![Beispielliefergebiet von Marc's Pizzaland welches den Kern von Iserlohn abdeckt, jedoch nicht die äußeren Stadtteile](polygon.png)
+
 ## 5. Beschreibung der zentralen eingesetzten Algorithmen
 
 ### 5.1 Liefergebiet
@@ -109,3 +115,10 @@ https://gastrobit.de/api/stripe/webhook
 https://dashboard.stripe.com/test/webhooks/create?endpoint_location
 
 ![Alt text](image.png)
+
+
+
+Quellen und verwendete Libraries:
+
+- [https://github.com/freenowtech/react-polygon-editor](@freenow/react-polygon-editor) - Polygon-Editor zum editieren des Liefergebiets
+- [https://github.com/clauderic/dnd-kit](@dnd-kit/core) - Drag and Drop Library für React
