@@ -6,7 +6,7 @@
 
 # Ausarbeitung: Entwicklung einer Alternative zu Lieferando
 
-## 1. Ermittlung der Anforderungsaufnahme
+## Ermittlung der Anforderungsaufnahme
 
 Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombination aus Marktforschung und einem Gastronomeninterview ermittelt. Die Hauptanforderungen sind:
 
@@ -18,6 +18,7 @@ Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombin
 - Tracking und Verwaltung des Bestellvorgangs
 - Niedrige Kommissionen für Gastronomen
 
+## Identifikation der Anwendungsfälle des Softwareprodukts
 ![Use Case Diagramm für Gastronomen und Endnutzer](usecasediagram.png)
 
 ## 2. Identifikation der Anwendungsfälle des Softwareprodukts
@@ -50,7 +51,7 @@ sequenceDiagram
     Gastrobit->>Kunde: Zeigt Bestellstatus
 ```
 
-## 3. Entwurf einer Benutzungsoberfläche für das Produkt
+## Entwurf einer Benutzungsoberfläche für das Produkt
 
 Die Benutzungsoberfläche wurde mit Wireframes entworfen, um eine benutzerfreundliche und intuitive Navigation zu gewährleisten. Die Hauptelemente der Benutzungsoberfläche sind:
 
@@ -60,7 +61,7 @@ Die Benutzungsoberfläche wurde mit Wireframes entworfen, um eine benutzerfreund
 
 Die Wireframes sind im Anhang A zu finden.
 
-## 4. Herleitung eines Datenmodells
+## Herleitung eines Datenmodells
 
 Das Datenmodell wurde auf Basis der identifizierten Anforderungen und Anwendungsfälle erstellt. Es besteht aus folgenden Tabellen:
 
@@ -69,7 +70,7 @@ Das Datenmodell wurde auf Basis der identifizierten Anforderungen und Anwendungs
 - Orders
 - Users (Verwaltet durch Supabase)
 
-### 4.1.1 Restaurants
+### Restaurants
 
 Diese Tabelle speichert alle Restaurants, die von Gastronomen erstellt wurden. Sie enthält alle wichtigen Informationen, wie beispielsweise den Namen des Restaurants, die User-ID des Gastronomen, die ID des Stripe-Subaccounts (Connect-Express-Account) sowie die Speisekarte als JSON und das Liefergebiet als Koordinatenarray (Längengrad und Breitengrad), welches ein geschlossenes Polygon ergibt.
 
@@ -90,20 +91,20 @@ Wir hatten mehrere Ansätze um ein Liefergebiet zu definieren.
 
 ![Beispielliefergebiet von "Marc's Pizzaland" welches den Kern von Iserlohn abdeckt, jedoch nicht die äußeren Stadtteile.](polygon.png)
 
-### 4.1.2 Custom Domains
+### Custom Domains
 
 Eine primitive Tabelle, welche alle benutzerdefinierten Domains der Gastronomen speichert. Beim hinzufügen oder entfernen einer Domain wird ein Nameservereintrag bei unserem Hostinganbieter AWS (via Vercel.com) ebenso hinzugefügt oder entfernt.
 Diese Tabelle wird für jeden Besuch der Website aufgerufen, um zu prüfen, ob die Domain des Besuchers mit einer Domain eines Restaurants übereinstimmt. Wenn dies der Fall ist, wird der Besucher auf die Restaurantseite weitergeleitet. Dieser Mechanismus ist ähnlich wie _VHosts_ bei Apache oder NGINX.
 
-### 4.1.3 Orders
+### Orders
 
 Diese Tabelle speichert alle Bestellungen, die über die Plattform getätigt wurden. Jede Bestellung ist mit einem Restaurant verknüpft und enthält Informationen wie die Bestelldetails, den Zahlungsstatus, den Bestellstatus ("Ausgeliefert", "In Bearbeitung", "Offen", "Abgelehnt"; _im Falle einer Ablehnung bekommt der Kunde sein Geld zurück_), den Checkout-Link und die Lieferadresse des Kunden.
 
-## 4.2 Datenbankdiagramm
+### Datenbankdiagramm
 
 ![Datenbankdiagramm](DB.png)
 
-## 4.3 Row-Level Security
+### Row-Level Security
 
 Da wir uns für eine Serverless-Architektur aus Kosten- und Skalierungsgründen, sowie aus Gründen der Einfachheit entschieden haben, haben wir uns für Supabase als Datenbankanbieter entschieden. Supabase bietet eine primitive PostgreSQL-Datenbank mit Row-Level Security an, welche es ermöglicht, die Datenbank auf Zeilenebene zu schützen. Dies bedeutet, dass wir die Datenbank beispielsweise so konfigurieren können, dass ein Gastronom nur auf seine eigenen Restaurants updaten kann, und nicht auf die Restaurants anderer Gastronomen sehen kann. Die Standardpolicy ist hier "Least Privilege", das bedeutet dass niemand operationen ohne explizite Erlaubnis per policy erstellen kann.
 
@@ -132,9 +133,9 @@ create policy "Jeder kann Bestellungen hinzufügen"
 
 Die vollständigen RLS-Policy-Expressions sind im Ordner `doku/policies/policies.sql` zu finden zu finden.
 
-## 5. Beschreibung der zentralen eingesetzten Algorithmen
+## Beschreibung der zentralen eingesetzten Algorithmen
 
-### 5.1 Liefergebiet
+### Liefergebiet
 
 Um festzustellen ob ein Punkt in einem Polygon liegt, wird der "Point Inclusion in Polygon Test"-Algorithmus verwendet. Dieser ist von W. Randolph Franklin veröffentlicht worden, und wurde integriert um zu prüfen, ob sich die Lieferadresse des Kunden im Liefergebiet des Restaurants befindet.
 
@@ -142,7 +143,7 @@ Siehe dazu https://wrfranklin.org/Research/Short_Notes/pnpoly.html
 
 Diesen hatte ich zu Anfang selbst implementiert, jedoch ist mir bei einem späteren Wechsel von Leaflet.js zu @freenow/react-polygon-editor (das Tool, welches zum interaktiven zeichnen von Polygonen verwendet wird), aufgefallen, dass genau dieser gleiche Algorithmus ebenfalls in diesem Paket verwendet wird. Daher habe ich mich entschieden, meine eigene Implementation zu ersetzen, da der von FreeNow einfach besser zu lesen ist.
 
-### 5.3 Schemas
+### Schemas
 
 Da wir in unserer Datenbank ein JSON-Objekt speichern, müssen wir sehr viel auf Server- und Clientseite validieren.
 
@@ -210,7 +211,7 @@ export const categories = z.array(category);
 
 Diese Struktur erlaubt uns, sehr einfach den Zustand unserer Speisekarte zu verwalten, und die Daten auf Korrektheit zu validieren. Außerdem macht es die Arbeit mit dem Zustandsautomaten des Warenkorbes wesentlich leichter, da diese Struktur uns erlaubt, Autocomplete von VSCode zu verwenden.
 
-### 5.2 Preise ausrechnen
+### Preise ausrechnen
 
 Hierbei handelt es sich um nichts wirklich komplexes, jedoch ist es wichtig, dass die Preise korrekt berechnet werden. Hierbei handelt es sich um einen einfachen Algorithmus, der die Preise der Variante, und der Extras addiert.
 
@@ -249,7 +250,7 @@ const calcPrice = () => {
 };
 ```
 
-## 6. Geplante Abnahmetests zur Validierung der Anforderungen
+## Geplante Abnahmetests zur Validierung der Anforderungen
 
 Die Abnahmetests werden durchgeführt, um die Funktionalität des Produkts zu überprüfen und sicherzustellen, dass alle Anforderungen erfüllt sind. Sie umfassen unter anderem:
 
@@ -266,11 +267,11 @@ Die Abnahmetests werden durchgeführt, um die Funktionalität des Produkts zu ü
 - Testen des Bestellprozesses und der Bezahlung für den Endkunden
 - Testen des Bestellstatus und der Verwaltung der Bestellung durch den Gastronomen
 
-## 7. Geplante Inbetriebnahme auf technischer Ebene
+## Geplante Inbetriebnahme auf technischer Ebene
 
 Die Inbetriebnahme umfasst die Installation und Konfiguration des Servers, die Einrichtung der Datenbank und die Bereitstellung der Anwendung im Internet. Wir liefern bereits eine `.env`-Datei mit, welche die Konfiguration für die Datenbank, Stripe, und Vercel enthält. Diese muss lediglich mit den eigenen Daten gefüllt werden, kann jedoch zu Entwicklungszwecken auch weiterhin mit unseren Daten verwendet werden.
 
-### 7.1 Optionale Anleitung für Self-Hosting
+### Optionale Anleitung für Self-Hosting
 
 Es werden folgende Accounts benötigt:
 
@@ -280,7 +281,7 @@ Es werden folgende Accounts benötigt:
 
 Außerdem werden Grundkenntnisse in Git benötigt.
 
-#### 7.1.1 Vercel.com
+#### Vercel.com / AWS
 
 1. Erstellen Sie ein neues Projekt auf [Vercel.com](https://vercel.com/new)
 2. Kopieren Sie alle Projektdateien in eine Git-Repository, und klicken Sie auf vercel.com auf "Import Project", und wählen Sie z.B. von Github.com, Gitlab.com o.ä. ihre Git-Repository aus. Sie können den Namen der Branch durch "GIT_BRANCH_FOR_DOMAINS" definieren, falls Sie eine andere Branch als "main" verwenden möchten.
@@ -288,7 +289,9 @@ Außerdem werden Grundkenntnisse in Git benötigt.
 4. Erstellen Sie auf [Vercel.com](https://vercel.com/account/tokens) ein neues Token, und kopieren Sie es als "AUTH_BEARER_TOKEN" in die .env-Datei.
 5. Nun wird Vercel automatisch nach jedem Git-Commit die Anwendung neu bauen und deployen. Durch das Bearer-Token ist es unserer Anwendung außerdem möglich, die Domains zu verwalten und DNS-Einträge für die Gastronomen zu verwalten.
 
-#### 7.1.2 Supabase.com
+Wenn Sie statt vercel.com direkt auf AWS hosten wollen, ist das ebenso über die [Vercel-AWS-Extension](https://aws.amazon.com/marketplace/pp/prodview-lwqascgzju3bo) möglich.
+
+#### Supabase.com
 
 1. Erstellen Sie ein neues Projekt auf [Supabase.com](https://app.supabase.io/)
 2. Wählen Sie eine Region aus, die zu ihren Endnutzern physisch nah ist und aus Datenschutzsicht sinnvoll ist, z.B. Frankfurt in Deutschland.
@@ -304,7 +307,7 @@ Außerdem werden Grundkenntnisse in Git benötigt.
       2. Kopieren Sie den Benutzernamen und das Passwort des Supabase-Admins, und loggen Sie sich mit ``psql -h db.<project-id>.supabase.co -U postgres -W`` ein. *Achten Sie hier auf die Domainendung ``.co`` und nicht ``.com``.*
       3. Führen Sie die SQL-Statements aus ``pg_dump.sql`` aus, um die Tabellen zu erstellen.
 
-#### 7.1.3 Stripe.com
+#### Stripe.com
 
 1. Erstellen Sie ein neues Projekt auf [Stripe.com](https://stripe.com/)
 2. Verifizieren Sie ihr Konto, indem Sie die notwendigen Dokumente hochladen, oder verwenden Sie den Testmodus ohne Verifizierung (dies ist für den Produktivbetrieb nicht empfohlen, jedoch sinnvoll in einer Testumgebung).
@@ -313,12 +316,12 @@ Außerdem werden Grundkenntnisse in Git benötigt.
 5. Navigieren Sie zu den [Webhooks](https://dashboard.stripe.com/webhooks) und erstellen Sie einen neuen Webhook mit der URL ``https://<domain>/api/stripe/webhook``. Wählen Sie als "Event-Typen" alles mit dem Präfix "checkout.session.*" aus. Kopieren Sie den "Signing Secret" als ``STRIPE_WEBHOOK_SECRET`` in die .env-Datei.
 6. Legen Sie die URL fest, zu welcher navigiert werden soll, wenn ein Gastronom fertig mit der Erstellung seines Stripe-Subkontos ist. Tragen Sie diese als ``STRIPE_RETURN_URL`` und ``STRIPE_REFRESH_URL`` in die .env-Datei ein.
 
-#### 7.1.4 Root-URL
+#### Root-URL
 
 Tragen Sie ihre Root-URL als ``NEXT_PUBLIC_ROOT_URL`` in die .env-Datei ein. Diese wird für die Generierung von Links verwendet, z.B. für die Bestellbestätigung, oder für die Weiterleitung nach dem Checkout. Tragen Sie außerdem für eine Produktiventwicklung die Umgebungsvariable ``env`` als ``production`` ein, damit weniger geloggt wird.
 
 
-## 8. Einführung der Nutzung des Produkts durch den Endnutzer
+## Einführung der Nutzung des Produkts durch den Endnutzer
 
 Die Einführung der Nutzung des Produkts durch den Endnutzer umfasst die Erstellung von Benutzerhandbüchern und Schulungsunterlagen sowie die Durchführung von Schulungen für Gastronomen.
 
