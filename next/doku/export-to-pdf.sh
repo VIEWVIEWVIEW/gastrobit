@@ -1,0 +1,2 @@
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P ) # Unused because we changed the structure; but in case we change our mind once again, we keep it x)
+pandoc $parent_path/README.md -o Ausarbeitung.pdf --toc -V papersize:a4 --highlight-style pygments -N -V geometry:"top=2cm, bottom=1.5cm, left=2cm, right=2cm" -V toc-title:"Inhaltsverzeichnis" -F mermaid-filter --include-in-header figure.tex

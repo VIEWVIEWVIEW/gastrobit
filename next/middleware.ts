@@ -1,5 +1,6 @@
-import { getToken } from 'next-auth/jwt'
 import { NextRequest, NextResponse } from 'next/server'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from './types/supabase'
 
 export const config = {
   matcher: [
@@ -29,29 +30,95 @@ export default async function middleware(req: NextRequest) {
       still need to add "*.platformize.vercel.app" as a wildcard domain on your Vercel dashboard. */
   const currentHost =
     process.env.NODE_ENV === 'production' && process.env.VERCEL === '1'
-      ? hostname.replace(`.gastrobit.de`, '')
-      : hostname.replace(`.localhost:3000`, '')
+      ? hostname.replace(`.gastrobit.de`, '.gastrobit.de')
+      : hostname.replace(`.localhost:3000`, '.gastrobit.de')
 
-  // rewrites for app pages
-  if (currentHost == 'app') {
-    if (
-      url.pathname === '/login' &&
-      (req.cookies.get('next-auth.session-token') ||
-        req.cookies.get('__Secure-next-auth.session-token'))
-    ) {
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
-
-    url.pathname = `/app${url.pathname}`
-    return NextResponse.rewrite(url)
-  }
+  console.log('hostname', hostname)
 
   // rewrite root application to `/home` folder
-  if (hostname === 'localhost:3000' || hostname === 'gastrobit.de' || hostname === 'www.gastrobit.de') {
+  if (
+    hostname === 'gastrobit.de' ||
+    hostname === 'www.gastrobit.de' ||
+    hostname === 'localhost:3000' ||
+    hostname === 'www.localhost:3000' ||
+    hostname === 'gastrobit.vercel.app' // preview deployment on vercel
+  ) {
     return NextResponse.rewrite(new URL(`/home${path}`, req.url))
   }
 
+  // else we are on a user page
+  // therefore we need the restaurant id from db
+  const supabase = new SupabaseClient<Database>(
+    'https://cdnbppscedvrlglygkyn.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbmJwcHNjZWR2cmxnbHlna3luIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDU2NjkwMiwiZXhwIjoxOTk2MTQyOTAyfQ.yFo5jlzaEu31TjrGH_sGJiSXMQk7u3mxSshcCtsRI3U',
+  )
+
+  console.log('currentHost', currentHost)
+
+
+  // if the current domain is a gastrobit subdomain, we can directly get the restaurant id from the subdomain
+  if (currentHost.includes('gastrobit.de')) {
+    const { data: restaurant, error } = await supabase
+      .from('restaurants')
+      .select('id')
+      .eq('subdomain', currentHost)
+      .limit(1)
+      .single()
+
+    if (error || !restaurant) {
+      return NextResponse.rewrite(new URL(`/404.tsx`, req.url))
+    }
+
+    return NextResponse.rewrite(
+      new URL(`/_sites/${restaurant.id}${path}`, req.url),
+    )
+  }
+
+
+  // get the restaurant id of our current host
+  const { data: customDomainRow, error } = await supabase.from('custom_domains').select('*').eq('domain', currentHost).limit(1).single()
+
+
+
+
+  /**
+   * 
+  .from('restaurants')
+  .select('id, custom_domains !inner (restaurant_id)')
+  //.eq('custom_domains.domain', hostname)
+  //.eq('gastrobit_subdomain', currentHost)
+  // make an .or() query with the two conditions above
+  .or(`domain.eq.${currentHost}`, {
+    foreignTable: 'custom_domains',
+  })
+  .limit(1)
+  .single()
+  */
+
+  //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.domain.eq.[${currentHost}]`)
+  //.single()
+
+
+  //.eq('gastrobit_subdomain', [rewrittenHostname])
+  //.or(`gastrobit_subdomain.eq.${rewrittenHostname}, 
+  //.or(`custom_domains.overlaps.[${hostname}]`)
+  //.overlaps('custom_domains', [hostname])
+  //.or(`gastrobit_subdomain.eq.${currentHost},custom_domains.ov.{${hostname}}`)
+  //.eq('gastrobit_subdomain', currentHost)
+
+  //.single()
+
+  console.log('data', customDomainRow, error)
+
+  const restaurantId = customDomainRow?.restaurant_id
+
+  // if no restaurant id is found, the restaurant does not exist. We redirect to /home/404
+  if (!restaurantId) {
+    return NextResponse.rewrite(new URL(`/404.tsx`, req.url))
+  }
+
   // rewrite everything else to `/_sites/[site] dynamic route
-  return NextResponse.rewrite(new URL(`/_sites/${currentHost}${path}`, req.url))
+  return NextResponse.rewrite(
+    new URL(`/_sites/${restaurantId}${path}`, req.url),
+  )
 }

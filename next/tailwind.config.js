@@ -6,8 +6,13 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx}",
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
-    "./layouts/**/*.{js,ts,jsx,tsx}",
   ],
+  /*
+  safelist: [
+    {
+      pattern: /./
+    },
+  ],*/
   theme: {
     extend: {
       colors: {
@@ -59,6 +64,16 @@ module.exports = {
     // ...
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
+    require("daisyui")
   ],
+  daisyui: {
+    styled: true,
+    themes: ["cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"],
+    base: true,
+    utils: true,
+    logs: true,
+    rtl: false,
+    darkTheme: "dark",
+  },
 }
 

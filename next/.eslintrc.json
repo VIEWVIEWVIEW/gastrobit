@@ -1,4 +1,9 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["supabase/**/*.ts"]
+  "ignorePatterns": [
+    "supabase/**/*.ts"
+  ],
+  "rules": {
+    "react/no-unescaped-entities": "off"
+  }
 }

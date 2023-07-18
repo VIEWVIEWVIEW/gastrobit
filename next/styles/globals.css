@@ -3,12 +3,23 @@
 @tailwind utilities;
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium text-white bg-taubmanspurple-600 hover:bg-taubmanspurple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+  .gastrobit-btn-primary {
+    @apply flex flex-row justify-center px-4 py-2 border border-transparent text-base font-medium text-white focus:ring-2 focus:ring-taubmanspurple-100 bg-taubmanspurple-600 hover:bg-taubmanspurple-700 focus:outline-none ;
   }
 
-  .input {
-    @apply border-2 border-sepia-800 bg-sentrysilver-300 focus:border-sepia-800 focus:ring-0;
+  .gastrobit-btn-secondary {
+    @apply flex flex-row justify-center px-4 py-2 border-2 border-black text-base font-medium text-black focus:ring-2 focus:ring-taubmanspurple-100 bg-sepia-200 hover:bg-sepia-100 focus:outline-none ;
+  }
+
+  .btn-red {
+
+    @apply flex flex-row justify-center px-4 py-2 border-2 border-black text-base font-medium text-white focus:ring-2 focus:ring-taubmanspurple-100 bg-red-500 hover:bg-red-600 focus:outline-none ;
+
+
+  }
+
+  .gastrobit-input {
+    @apply border-2 border-sepia-800 bg-sentrysilver-300 focus:border-sepia-800 focus:ring-0 ring-0;
   }
 }
 

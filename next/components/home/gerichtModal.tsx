@@ -1,0 +1,279 @@
+/* eslint-disable react/no-unescaped-entities */
+import { Dispatch, Fragment, MouseEventHandler, useState } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { XCircleIcon as XIcon } from '@heroicons/react/24/outline'
+import {
+  LinkIcon,
+  PlusSmallIcon as PlusSmIcon,
+  XMarkIcon as XCircleIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/solid'
+import { Categories as Karte, Gericht, Extras, Extra } from '@/types/schema'
+import { set } from 'zod'
+
+
+type Props = {
+  show: boolean
+  setShow: (open: any) => void
+  gericht: Gericht
+  setCategories: Dispatch<Karte>
+  categories: Karte
+  presets: Extras
+}
+
+export default function GerichtsModal(props: Props) {
+  const [currentSelectedPreset, setCurrentSelectedPreset] = useState<string>('')
+
+  const { show: open = false, setShow, gericht, setCategories, categories, presets } = props
+
+  const id = gericht.id
+
+  const [localGericht, setLocalGericht] = useState<Gericht>(gericht)
+
+  const saveGericht: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    // if we have less than 1 price, we have to alert the user
+    if (localGericht.preise.length < 1) {
+      alert("Sie müssen mindestens einen Preis angeben")
+      return
+    }
+
+
+    const newCategories = [...categories]
+
+    // replace the gericht in the category with our local gericht
+    for (const category of newCategories) {
+      const index = category.gerichte.findIndex((g) => g.id === id)
+      if (index !== -1) {
+        console.log("replacing", category.gerichte[index], "with", localGericht)
+        category.gerichte[index] = localGericht
+      }
+      setCategories(newCategories)
+    }
+    setShow(false)
+  }
+
+  const abort: MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault()
+    setLocalGericht(gericht)
+    setShow(false)
+  }
+
+  const [showExtraEdit, setShowExtraEdit] = useState<boolean>(false)
+
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog
+        as='div'
+        className='fixed inset-0 overflow-hidden'
+        onClose={setShow}>
+        <div className='absolute inset-0 overflow-hidden'>
+          <Dialog.Overlay className='absolute inset-0' />
+
+          <div className='fixed inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none sm:pl-16'>
+            <Transition.Child
+              as={Fragment}
+              enter='transform transition ease-in-out duration-500 sm:duration-700'
+              enterFrom='translate-x-full'
+              enterTo='translate-x-0'
+              leave='transform transition ease-in-out duration-500 sm:duration-700'
+              leaveFrom='translate-x-0'
+              leaveTo='translate-x-full'>
+              <div className='w-screen max-w-md pointer-events-auto'>
+                <form className='flex flex-col h-full bg-white divide-y divide-gray-200 shadow-xl'>
+                  <div className='flex-1 h-0 overflow-y-auto'>
+                    <div className='px-4 py-6 bg-taubmanspurple-700 sm:px-6'>
+                      <div className='flex items-center justify-between'>
+                        <Dialog.Title className='text-lg font-medium text-white'>
+                          {props.gericht.ueberschrift}
+                        </Dialog.Title>
+                        <div className='flex items-center ml-3 h-7'>
+                          <button
+                            type='button'
+                            className='text-white hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-white'
+                            onClick={() => setShow(false)}
+                          >
+                            <XIcon className='w-6 h-6' aria-hidden='true' />
+                          </button>
+                        </div>
+                      </div>
+                      <div className='mt-1'>
+                        <p className='text-sm text-gray-100'>
+                          Hier kannst du die Daten des Gerichts ändern. Oben ist der ursprüngliche Name des Gerichtes, damit du nicht ausversehen ein falsches Gericht editierst.
+                        </p>
+                      </div>
+                    </div>
+                    <div className='flex flex-col justify-between flex-1'>
+                      <div className='px-4 divide-y divide-gray-200 sm:px-6'>
+                        <div className='pt-6 pb-5 space-y-6'>
+                          <div>
+                            <label
+                              className='block text-sm font-medium text-gray-900'>
+                              Überschrift (z.B. "Pizza Prosciutto")
+                            </label>
+                            <div className='mt-1'>
+                              <input
+                                type='text'
+                                className='w-full gastrobit-input'
+                                value={localGericht.ueberschrift}
+                                onChange={e => setLocalGericht({ ...localGericht, ueberschrift: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label
+
+                              className='block text-sm font-medium text-gray-900'>
+                              Unterschrift
+                            </label>
+                            <div className='mt-1'>
+                              <textarea
+                                rows={2}
+                                className='block w-full gastrobit-input'
+                                value={localGericht.unterschrift}
+                                onChange={e => setLocalGericht({ ...localGericht, unterschrift: e.target.value })}
+                                placeholder='mit Eisbergsalat, Tomaten, Gurken und Mais'
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className='text-sm font-medium text-gray-900'>
+                              Preise
+                            </h3>
+                            <div className='mt-2'>
+                              <div className='flex flex-col space-y-2'>
+                                {localGericht.preise.map((preis, index) => (
+                                  <div
+                                    key={index}
+
+                                    className='flex flex-row space-x-3'>
+                                    {/* Input for "klein", "mittel", "groß" etc */}
+                                    <input type='text' className='flex-grow gastrobit-input' value={preis.name} onChange={e => {
+                                      const newPreise = [...localGericht.preise]
+                                      newPreise[index].name = e.target.value
+                                      setLocalGericht({ ...localGericht, preise: newPreise })
+                                    }} />
+
+                                    {/* Input for the price */}
+                                    <input
+                                      type='number'
+                                      className='w-1/4 gastrobit-input'
+                                      step="any"
+                                      value={preis.preis}
+                                      onChange={e => {
+                                        const newPreise = [...localGericht.preise]
+                                        newPreise[index].preis = parseFloat(e.target.value)
+                                        setLocalGericht({ ...localGericht, preise: newPreise })
+                                      }}
+                                    />
+
+                                    {/* Button to remove the price */}
+                                    <XCircleIcon className="h-10 cursor-pointer"
+                                      onClick={(e) => {
+                                        const newPreise = [...localGericht.preise]
+                                        newPreise.splice(index, 1)
+                                        setLocalGericht({ ...localGericht, preise: newPreise })
+                                      }}
+                                    />
+
+                                  </div>
+                                ))}
+
+
+                                {/* Button to add a new price */}
+                                <PlusSmIcon
+                                  className='w-8 h-8 cursor-pointer'
+                                  aria-hidden='true'
+                                  onClick={() => {
+                                    const newPreise = [...localGericht.preise]
+                                    newPreise.push({ name: "klein", preis: 10.00 })
+                                    setLocalGericht({ ...localGericht, preise: newPreise })
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <fieldset>
+                            <legend className='text-sm font-medium text-gray-900'>
+                              Extra-Attribute
+                            </legend>
+                            <div className='mt-2 space-y-5'>
+                              {/* Presets */}
+                              {presets.length > 0 && <select
+                                onChange={e => {
+                                  e.preventDefault()
+                                  setCurrentSelectedPreset(e.target.value)
+                                }}
+                                value={currentSelectedPreset}
+                              >
+                                {presets.map((preset, index) => (<option key={index}
+                                  value={preset.name}>{preset.name}</option>
+                                ))}
+                              </select>}
+
+
+                              <button className='gastrobit-btn-secondary' disabled={!currentSelectedPreset}
+                                onClick={e => {
+                                  e.preventDefault()
+                                  const newExtras = localGericht?.extras ?? []
+                                  const selectedPreset = presets.find(p => p.name === currentSelectedPreset)
+
+                                  // if the preset is not already in the extras, add it
+                                  if (selectedPreset && !newExtras.find(e => e.name === selectedPreset.name)) {
+                                    newExtras.push(selectedPreset)
+                                    setLocalGericht({ ...localGericht, extras: newExtras })
+                                  }
+                                }}
+                              >Hinzufügen</button>
+                            </div>
+
+                          </fieldset>
+
+
+                          {/* Extras */}
+                          <div className='flex flex-col w-full gap-y-2'>
+                            {localGericht.extras?.map((extra, index) => (<div key={index}>
+                              <div className='flex flex-row items-center justify-between p-2 bg-sepia-50'>
+                                <p className='cursor-pointer hover:text-gray-600 hover:underline'>{extra.name}</p>
+
+
+                                <XCircleIcon className='w-6 h-6 cursor-pointer hover:text-gray-600' onClick={() => {
+                                  const newExtras = localGericht?.extras ?? []
+                                  newExtras.splice(index, 1)
+                                  setLocalGericht({ ...localGericht, extras: newExtras })
+                                }} />
+                              </div>
+                            </div>))}
+
+                          </div>
+
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex justify-end flex-shrink-0 px-4 py-4'>
+                    <button
+                      type='button'
+                      className='mr-2 gastrobit-btn-secondary'
+                      onClick={abort}>
+                      Abbrechen
+                    </button>
+                    <button
+                      type='submit'
+                      className='gastrobit-btn-primary'
+                      onClick={saveGericht}
+                    >
+                      Ändern
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  )
+}
