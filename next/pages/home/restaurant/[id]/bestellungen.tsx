@@ -4,7 +4,7 @@ import { createBrowserSupabaseClient, createServerSupabaseClient } from '@supaba
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Dispatch, Fragment, useCallback, useEffect, useState } from 'react'
 
 
 
@@ -81,11 +81,14 @@ function Page(props: Props) {
         schema: 'public',
         table: 'orders',
       }, payload => {
-        console.log('payload', payload)
-
-
         setOrders(orders => [payload.new, ...orders])
-
+      })
+      .on<Order>('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+      }, payload => {
+        setOrders(orders => orders.map(order => order.id === payload.new.id ? payload.new : order))
       })
       .subscribe((status) => console.log(status))
 
@@ -125,18 +128,17 @@ function Page(props: Props) {
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Lieferstatus</th>
-                      <th
-                        scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'></th>
-                      <th
-                        scope='col'
                         className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
-                        <span className='sr-only'>Edit</span>
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'></th>
+                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Lieferstatus</th>
+                      <th
+                        scope='col'
+                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Email</th>
+                      <th
+                        scope='col'
+                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Bezahlstatus</th>
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-sepia-200 bg-sepia-50'>
@@ -158,24 +160,26 @@ const Order = ({ order }: { order: Order }) => {
 
   const [orderStatus, setOrderStatus] = useState(order.order_status)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const updateOrderStatus = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     setIsSubmitting(true)
     setOrderStatus(e.target.value)
-    await supabase.from('orders').update({ order_status: e.target.value }).eq('id', order.id)
+    await supabase.from('orders').update({ order_status: e.target.value, updated_at: "now()" }).eq('id', order.id)
     setIsSubmitting(false)
   }
 
   return <>
     <tr>
       <td className='py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6'>
-        {new Date(order.created_at).toLocaleString()}
+        {isSubmitting ? 'Updating...' : new Date(order.created_at).toLocaleString()}
       </td>
       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
         {order.address}
       </td>
       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-        {order.email}
+        <button className='gastrobit-btn-primary' onClick={() => setShowModal(true)}>Zeige Bestellinformationen</button>
+        {showModal && <OrderModal order={order} setShowModal={setShowModal} />}
       </td>
       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
         <select className='gastrobit-input' value={orderStatus} onChange={updateOrderStatus}>
@@ -189,14 +193,78 @@ const Order = ({ order }: { order: Order }) => {
         <a
           href={`/restaurant/${1}/menu`}
           className='py-3 hover:text-gray-400 hover:underline'>
-          Karte editieren
+          {order.email}
         </a>
       </td>
       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-
+        {order.payment_status}
       </td>
     </tr>
   </>
 }
+
+const OrderModal = ({ order, setShowModal }: { order: Order, setShowModal: Dispatch<boolean> }) => {
+  const cart = order.order as Cart
+
+  return <div className='fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none'>
+    <div className='relative w-auto max-w-3xl mx-auto my-6'>
+      {/*content*/}
+      <div className='relative flex flex-col w-full bg-white border-0 shadow-lg outline-none focus:outline-none'>
+        {/*header*/}
+        <div className='flex items-start justify-between p-5 border-b border-solid border-blueGray-200'>
+          <h3 className='text-3xl font-semibold'>
+            Bestellinformationen
+          </h3>
+          <button
+            className='float-right p-1 ml-auto text-3xl font-semibold leading-none text-black bg-transparent border-0 outline-none focus:outline-none'
+            onClick={() => setShowModal(false)}
+          >
+            <span className='block w-6 h-6 text-2xl text-black bg-transparent outline-none focus:outline-none'>
+              ×
+            </span>
+          </button>
+        </div>
+        {/*body*/}
+        <div className='relative flex-auto p-6'>
+          <div className='flex flex-col'>
+            {cart.map((gericht, index) => <Row gericht={gericht} key={index} index={index} />)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+import { cartSchema } from '@/pages/api/checkout/create-order'
+import { z } from 'zod'
+
+type Cart = z.infer<typeof cartSchema>
+
+const Row = ({ gericht, index }: {
+  gericht: {
+    id: string | number;
+    name: string;
+    variante: string;
+    preis: number;
+    extras?: string | Record<string, string | number[]> | undefined;
+  },
+  index: number
+}) => {
+
+  return <div className='flex flex-row justify-start gap-x-1'>
+    <span>
+      {index + 1}.
+    </span>
+    <div>
+      {gericht.name}
+    </div>
+    <b>{gericht.variante}</b>
+    <div>
+      {JSON.stringify(gericht.extras)}
+    </div>
+  </div>
+}
+
+
 
 export default Page

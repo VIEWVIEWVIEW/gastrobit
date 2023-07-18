@@ -3,6 +3,7 @@ import { GetServerSideProps } from 'next'
 import React from 'react'
 import { Navbar } from '../restaurant/navbar'
 import Restaurant from '@/pages/home/restaurant/[id]/settings'
+import { Toaster } from 'react-hot-toast'
 
 export const getServerSideProps: GetServerSideProps = async function (ctx) {
   ctx.res.setHeader(
@@ -36,6 +37,7 @@ function RestaurantLayout({
   return (
     <>
       <div data-theme={theme}>
+        <Toaster />
         <div className='container mx-auto'>
           <Navbar restaurantName={restaurant.name} />
         </div>

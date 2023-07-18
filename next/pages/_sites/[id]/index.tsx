@@ -150,7 +150,7 @@ function GerichtModal({ gericht, open, setOpen }: { gericht: Gericht, open: bool
 
   return (
     <dialog className="modal" open={open}>
-      <form method="dialog" className="modal-box">
+      <form method="dialog" className="modal-box text-base-content">
 
         <h3 className="text-lg font-bold">{gericht.ueberschrift}</h3>
         <h4 className="font-medium text-md">{gericht.unterschrift}</h4>
@@ -196,11 +196,11 @@ function GerichtModal({ gericht, open, setOpen }: { gericht: Gericht, open: bool
 
         )}
 
-        <div className="modal-action">
+        <div className="flex flex-col gap-y-2">
           {/* if there is a button in form, it will close the modal */}
-          <button className="btn-secondary btn" onClick={(e) => setOpen(false)}>Schließen</button>
+          <button className="w-full btn btn-secondary" onClick={(e) => setOpen(false)}>Schließen</button>
 
-          <button className='btn-primary btn'
+          <button className='w-full btn-primary btn'
             onClick={(e) => {
               e.preventDefault()
               handleAddToCart()

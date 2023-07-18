@@ -24,7 +24,7 @@ type PageProps = {
 
 import { Coordinate } from "@freenow/react-polygon-editor/src/types";
 import { BeatLoader } from "react-spinners";
-import toast from "react-hot-toast";
+import toast, { ToastBar, Toaster } from "react-hot-toast";
 
 // address types
 export type Address = {
@@ -132,8 +132,16 @@ function Page(props: PageProps) {
     if (json.checkout_link) {
       router.push(json.checkout_link)
     } else {
-      toast.error('Es ist ein Fehler aufgetreten. Bitte versuche es erneut.')
+      toast.error(json.error)
       console.error(json)
+    }
+  }
+
+
+
+  const emptyCart = () => {
+    for (let i = cart.gerichte.length; i >= 0; i--) {
+      cart.popIndex(i)
     }
   }
 
@@ -149,6 +157,8 @@ function Page(props: PageProps) {
           {cart.gerichte.length > 0 ? <>
             {cart.gerichte.map((gericht, index) => <WarenkorbRow gericht={gericht} key={index} index={index} karte={karte as Karte} />)}
           </> : "Keine Gerichte im Einkaufswagen"}
+
+          <button className="mt-5 btn btn-warning" onClick={emptyCart}>Warenkorb leeren</button>
         </div>
 
         <div>

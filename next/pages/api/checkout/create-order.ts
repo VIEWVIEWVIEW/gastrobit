@@ -12,6 +12,67 @@ import { z } from "zod";
 
 type Restaurant = Database["public"]["Tables"]["restaurants"]["Row"];
 
+// Cart schema
+/**
+// this is how a cart looks like. The schema further below checks for the generic structure
+const example = [
+  {
+    "id": "6a88261c-4fff-4275-91d4-1b0cc108c6bb",
+    "name": "Cheeseburger",
+    "variante": "standard",
+    "preis": 7.5,
+    "extras": {
+      "Ihre Burgersoße": "Ketchup"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Gemischter Salat",
+    "variante": "standard",
+    "preis": 7.5,
+    "extras": {
+      "Ihr Dressing": "French Dressing"
+    }
+  },
+  {
+    "id": "a237e9fe-2f2d-4ede-8fa7-39dd58aabfbd",
+    "name": "Eisbergsalat",
+    "variante": "standard",
+    "preis": 7.5,
+    "extras": {}
+  },
+  {
+    "id": "lol",
+    "name": "Pizza Prosciutto ",
+    "variante": "groß (30cm)",
+    "preis": 11,
+    "extras": {
+      "Ihre Pizzasoße": "Hollondaise",
+      "Ihre Pizzaaextras": [
+        1,
+        3
+      ]
+    }
+  }
+]
+*/
+
+export const cartSchema = z.array(z.object({
+  id: z.number().or(z.string()),
+  name: z.string(),
+  variante: z.string(),
+  preis: z.number(),
+  extras:
+    z.union(
+      [z.record(
+        z.string(),
+        z.union([z.string(), z.array(z.number())])
+      ),
+      z.string()])
+      .optional()
+}))
+
+
 // Adapted from https://wrfranklin.org/Research/Short_Notes/pnpoly.html & @freenow/react-polygon-editor 
 const isCoordinateInPolygon = (coordinate: Coordinate, polygon: Coordinate[]): boolean => {
   let inside = false;
@@ -69,7 +130,7 @@ const handler: NextApiHandler = async function (req, res) {
 
   if (error || !restaurant || !restaurant.stripe_account_id) {
     return res.status(400).json({
-      error: 'Mit diesem Restaurant ist etwas falsch. Bitte kontaktieren Sie den Support help@gastrobit.de mit einem Link zu diesem Restaurant.'
+      error: 'Bei diesem Restaurant wurde noch keine Auszahlungsmethode hinterlegt. Wenn Sie der Restaurantbesitzer sind, klicken Sie bitte einmalig auf "Umsätze" in ihrer Restaurantliste..'
     });
   }
 
@@ -81,73 +142,22 @@ const handler: NextApiHandler = async function (req, res) {
   }
 
   try {
-    /**
-    // this is how a cart looks like. The schema further below checks for the generic structure
-    const example = [
-      {
-        "id": "6a88261c-4fff-4275-91d4-1b0cc108c6bb",
-        "name": "Cheeseburger",
-        "variante": "standard",
-        "preis": 7.5,
-        "extras": {
-          "Ihre Burgersoße": "Ketchup"
-        }
-      },
-      {
-        "id": 3,
-        "name": "Gemischter Salat",
-        "variante": "standard",
-        "preis": 7.5,
-        "extras": {
-          "Ihr Dressing": "French Dressing"
-        }
-      },
-      {
-        "id": "a237e9fe-2f2d-4ede-8fa7-39dd58aabfbd",
-        "name": "Eisbergsalat",
-        "variante": "standard",
-        "preis": 7.5,
-        "extras": {}
-      },
-      {
-        "id": "lol",
-        "name": "Pizza Prosciutto ",
-        "variante": "groß (30cm)",
-        "preis": 11,
-        "extras": {
-          "Ihre Pizzasoße": "Hollondaise",
-          "Ihre Pizzaaextras": [
-            1,
-            3
-          ]
-        }
-      }
-    ]
-    */
 
-    const schema = z.array(z.object({
-      id: z.number().or(z.string()),
-      name: z.string(),
-      variante: z.string(),
-      preis: z.number(),
-      extras:
-        z.union(
-          [z.record(
-            z.string(),
-            z.union([z.string(), z.array(z.number())])
-          ),
-          z.string()])
-          .optional()
-    }))
-
-    schema.parse(cart)
+    cartSchema.parse(cart)
   } catch (error) {
     console.error(error)
     return res.status(400).json({
-      error: 'Mit dem Warenkorb ist etwas falsch. Bitte kontaktieren Sie den Support.'
+      error: 'Mit dem Warenkorb ist etwas falsch. Bitte leeren Sie den Warenkorb und laden Sie die Seite neu..'
     });
   }
   // at this point we can trust the cart
+
+  // check if delivery area is set
+  if (polygon.length < 3) {
+    return res.status(400).json({
+      error: 'Für dieses Restaurant wurde noch kein Liefergebiet festgelegt. Wenn Sie der Besitzer sind, legen Sie eines Fest unter gastrobit.de > Restauranteinstellungen > Liefergebiet festlegen.'
+    });
+  }
 
   // check if address is in delivery area
   const result = await client.search({
@@ -157,7 +167,7 @@ const handler: NextApiHandler = async function (req, res) {
 
 
   if (result.length === 0) {
-    console.error("No results found")
+    console.error("No results found for address", address)
     return res.status(400).json({
       error: 'Adresse nicht gefunden'
     });
@@ -214,10 +224,12 @@ const handler: NextApiHandler = async function (req, res) {
     line_items: lineItems(gerichte),
     payment_method_types: ['card', 'sofort', 'giropay', 'klarna'],
     mode: 'payment',
-    success_url: `http://${host}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `http://${host}/success?session_id={CHECKOUT_SESSION_ID}`,
     customer_email: address.email,
     submit_type: 'pay',
   });
+
+  const paymentIntentId = paymentIntent.id
 
 
   console.debug("paymentIntent", paymentIntent)
