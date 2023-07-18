@@ -97,11 +97,11 @@ Diese Tabelle wird für jeden Besuch der Website aufgerufen, um zu prüfen, ob d
 
 Diese Tabelle speichert alle Bestellungen, die über die Plattform getätigt wurden. Jede Bestellung ist mit einem Restaurant verknüpft und enthält Informationen wie die Bestelldetails, den Zahlungsstatus, den Bestellstatus ("Ausgeliefert", "In Bearbeitung", "Offen", "Abgelehnt"; _im Falle einer Ablehnung bekommt der Kunde sein Geld zurück_), den Checkout-Link und die Lieferadresse des Kunden.
 
-## Datenbankdiagramm
+### Datenbankdiagramm
 
 ![Datenbankdiagramm](DB.png)
 
-## Row-Level Security
+### Row-Level Security
 
 Da wir uns für eine Serverless-Architektur aus Kosten- und Skalierungsgründen, sowie aus Gründen der Einfachheit entschieden haben, haben wir uns für Supabase als Datenbankanbieter entschieden. Supabase bietet eine primitive PostgreSQL-Datenbank mit Row-Level Security an, welche es ermöglicht, die Datenbank auf Zeilenebene zu schützen. Dies bedeutet, dass wir die Datenbank beispielsweise so konfigurieren können, dass ein Gastronom nur auf seine eigenen Restaurants updaten kann, und nicht auf die Restaurants anderer Gastronomen sehen kann. Die Standardpolicy ist hier "Least Privilege", das bedeutet dass niemand operationen ohne explizite Erlaubnis per policy erstellen kann.
 
