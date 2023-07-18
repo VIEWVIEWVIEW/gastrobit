@@ -1,0 +1,7 @@
+% Override default figure placement To be within the flow of the text rather
+% than on it's own page.
+% https://stackoverflow.com/questions/49482221/pandoc-markdown-to-pdf-image-position
+\usepackage{float}
+\makeatletter
+\def\fps@figure{H} 
+\makeatother

@@ -148,8 +148,7 @@ const Table = ({ restaurants }: { restaurants: Restaurants[] }) => {
                         <Link
                           href={`/restaurant/${restaurant.id}/bestellungen`}
                           className='py-3 hover:text-gray-400 hover:underline'>
-                          {Math.round(Math.random() * 100) % 10} Bestellungen
-                          offen
+                          Bestellungen
                         </Link>
                       </td>
                       <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
