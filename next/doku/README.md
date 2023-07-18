@@ -570,6 +570,8 @@ Die ersten drei Status dienen nur der Verwaltung und Übersicht für Sie. Abgele
 
 ---
 
+## Quellen
+
 Falls Sie weitere Fragen haben, kontaktieren Sie unseren Support unter richts.marc-alexander@fh-swf.de.
 
 Quellen und verwendete Libraries:
