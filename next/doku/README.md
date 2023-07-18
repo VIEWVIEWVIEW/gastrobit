@@ -272,6 +272,8 @@ Außerdem werden Grundkenntnisse in Git benötigt.
 
 #### Vercel.com / AWS
 
+*Vercel.com / AWS bietet eine günstige Plattform, solange man unter den Limits bleibt. Bei unter 200M Requests pro Monat können wir unseren Dienst auf der Serverlessplattform von Vercel konstenlos betreiben. Dies ist ein großer Pluspunkt für uns, da wir so die Kosten für den Betrieb des Dienstes sehr gering halten können. Falls Gastrobit.de kommerziell wird, können wir auch ohne große Probleme horizontal skalieren.*
+
 1. Erstellen Sie ein neues Projekt auf [Vercel.com](https://vercel.com/new)
 2. Kopieren Sie alle Projektdateien in eine Git-Repository, und klicken Sie auf vercel.com auf "Import Project", und wählen Sie z.B. von Github.com, Gitlab.com o.ä. ihre Git-Repository aus. Sie können den Namen der Branch durch "GIT_BRANCH_FOR_DOMAINS" definieren, falls Sie eine andere Branch als "main" verwenden möchten.
 3. Kopieren Sie "PROJECT_ID_VERCEL", "TEAM_ID_VERCEL" aus den nun angezeigten Projekteinstellungen in die .env-Datei im Root-Verzeichnis dieses Projektes.
@@ -281,6 +283,8 @@ Außerdem werden Grundkenntnisse in Git benötigt.
 Wenn Sie statt vercel.com direkt auf AWS hosten wollen, ist das ebenso über die [Vercel-AWS-Extension](https://aws.amazon.com/marketplace/pp/prodview-lwqascgzju3bo) möglich.
 
 #### Supabase.com
+
+*Supabase bietet eine günstige Plattform, solange man unter den Limits bleibt. Bei unter 1GB DB-Gräße können wir unseren Dienst auf der Postgresql-Datanbank von Supabase konstenlos betreiben. Dies ist ein großer Pluspunkt für uns, da wir so die Kosten für den Betrieb des Dienstes sehr gering halten können. Falls Gastrobit.de kommerziell wird, können wir auch ohne große Probleme mit Read-Replicas skalieren; da die meisten Operationen auf unsere Datenbank reads sind.*
 
 1. Erstellen Sie ein neues Projekt auf [Supabase.com](https://app.supabase.io/)
 2. Wählen Sie eine Region aus, die zu ihren Endnutzern physisch nah ist und aus Datenschutzsicht sinnvoll ist, z.B. Frankfurt in Deutschland.
@@ -308,6 +312,8 @@ Wenn Sie statt vercel.com direkt auf AWS hosten wollen, ist das ebenso über die
 7. Erlauben Sie nur Bilderuploads durch das setzen der folgenden MIME-Typen: `image/jpg, image/jpeg, image/png, image/webp`.
 
 #### Stripe.com
+
+*Stripe ist ein Zahlungsanbieter, der es uns ermöglicht, Zahlungen von Endkunden zu akzeptieren, und diese an die Gastronomen weiterzuleiten. Stripe bietet eine sehr gute Dokumentation, und ist sehr einfach zu verwenden. Außerdem ist Stripe sehr günstig und bietet das Stripe-Dashboard für unsere Gastronomen an, welche darauf ihre Umsätze anschauen können.*
 
 1. Erstellen Sie ein neues Projekt auf [Stripe.com](https://stripe.com/)
 2. Verifizieren Sie ihr Konto, indem Sie die notwendigen Dokumente hochladen, oder verwenden Sie den Testmodus ohne Verifizierung (dies ist für den Produktivbetrieb nicht empfohlen, jedoch sinnvoll in einer Testumgebung).
@@ -497,12 +503,76 @@ Außerdem können Sie hier die Extra-Attribute aus ihren Presets hinzufügen. Ei
 
 Wenn Sie fertig sind, klicken Sie auf "Ändern", und anschließend auf "Speichern" am Ende der Seite.
 
-###
+### Bestellen
+
+#### Gerichtsauswahl
+
+Gehen Sie auf die Seite Ihres eingerichteten Restaurants. Benutzen Sie dafür Ihre Custom-Domain oder eine Subdomain. Wir haben eine Demoseite auf https://marcpizzaland.gastrobit.de/ vorbereitet.
+
+![Ein Demorestaurant.](restaurant1.png)
+
+Die Bedienung ist selbsterklärend, schließlich sollen Ihre Kunden sich auch zurechtfinden. Sie können Gerichte in den Warenkorb legen, Extras auswählen (sofern konfiguriert), und anschließend auf "Bestellen für X€" klicken. Der Preis auf dem Button aktualisiert automatisch.
+
+![Extras auswählen.](extrasadd.png)
+
+![Warenkorb](warenkorb.png)
+
+##### Lieferadresse
+
+Die nun anzugebende Lieferadresse muss im vorher definierten Liefergebietpolygon liegen. Für den sogenannten "Lookup" von der Adresse verwenden wir OpenStreetMap. Dies ist ein freies Projekt, welches von Freiwilligen gepflegt wird. Es ist daher wichtig in der Datenschutzerklärung darauf hinzuweisen, dass die Daten an OpenStreetMap übertragen werden. Die Einwilligung muss dafür erteilt werden, weshalb wir auf die Checkbox nicht verzichten dürfen.
+
+ Außerdem ist es wichtig, dass die Daten nicht für andere Zwecke verwendet werden dürfen, als für die Bestellung. Dies ist ebenfalls in der Datenschutzerklärung zu erwähnen. Wir übernehmen das für Sie.
+
+![Checkout](checkout.png)
+
+Sollte die Adresse nicht im Liefergebiet liegen, bekommt der Nutzer einen Hinweis darauf.
+
+Anschließend wird der Nutzer zur Zahlungsseite weitergeleitet.
+
+Hier können Sie, falls Sie Stripe im Demomodus verwenden, folgende Testdaten verwenden:
+
+```
+Kartennummer: 4242 4242 4242 4242
+Ablaufdatum: Ein Datum in der Zukunft
+CVC: Drei Ziffern Ihrer Wahl
+Name: Ein Name Ihrer Wahl
+Land: Ein Wunschland
+```
+
+![Zahlen, bitte.](stripe-checkout.png)
+
+
+### Bestellungen abarbeiten
+
+In der Restaurantübersicht können Sie auf "Bestellungen" klicken, um die Bestellungen zu verwalten.
+
+**Diese Ansicht ist *Live***. Das bedeutet, dass sobald eine neue Bestellung eingeht, diese Seite automatisch aktualisiert wird. Dies wird mit Websockets realisiert, und ist sehr performant. Sie können die Seite also einfach offen lassen, und Sie werden benachrichtigt, sobald eine neue Bestellung eingeht.
+
+![Bestellungsübersicht](bestellubersicht1.png)
+
+Wenn Sie auf "Zeige Bestellinformationen" klicken, bekommen Sie die Orderdetails angezeigt:
+
+![Bestellinformationen, die jemand in der Küche hoffentlich umsetzt.](pizzatunamitextratuna.png)
+
+Hier können Sie außerdem den Lieferstatus verändern, und einsehen, ob die Lieferung bereits bezahlt wurde. Mit den meisten Zahlungsmöglichkeiten wie Kreditkarte geht das innerhalb weniger Sekunden. Wir empfehlen, keine Bestellungen zu bearbeiten, bevor die Zahlung nicht abgeschlossen ist.
+
+*An dieser Stelle hatten wir die Designentscheidung getroffen, auch nicht-bezahlte Bestellungen anzuzeigen, einfach aus dem Grund, dass wir der Meinung sind, dass die Daten dem Gastronomen gehören, und er die Verantwortung dafür übernehmen soll.*
+
+### Lieferstatus
+
+Der Lieferstatus kann folgende Werte annehmen:
+- Offen
+- In Bearbeitung
+- Ausgeliefert
+- Abgelehnt
+
+Die ersten drei Status dienen nur der Verwaltung und Übersicht für Sie. Abgelehnt bedeutet jedoch, dass Sie die Bestellung nicht ausliefern können (z.B. weil Sie bereits so viel zu tun haben, oder nicht genug Zutanten haben). Sollten Sie diese Option auswählen, wird ein automatischer Refund an den Kunden getriggert, und Sie zahlen 35 Cent Gebühren an Stripe (sofern Sie auf Stripe wirklich Live sind, und nicht den Testmodus verwenden).
+
+---
 
 Falls Sie weitere Fragen haben, kontaktieren Sie unseren Support unter richts.marc-alexander@fh-swf.de.
 
 Quellen und verwendete Libraries:
-
 ```
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/modifiers": "^6.0.1",
