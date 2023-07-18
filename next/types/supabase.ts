@@ -54,7 +54,7 @@ export interface Database {
           email: string
           id: string
           order: Json
-          order_status: string | null
+          order_status: string
           payment_status: string | null
           restaurand_id: number
           updated_at: string
@@ -66,7 +66,7 @@ export interface Database {
           email: string
           id: string
           order: Json
-          order_status?: string | null
+          order_status?: string
           payment_status?: string | null
           restaurand_id: number
           updated_at?: string
@@ -78,7 +78,7 @@ export interface Database {
           email?: string
           id?: string
           order?: Json
-          order_status?: string | null
+          order_status?: string
           payment_status?: string | null
           restaurand_id?: number
           updated_at?: string

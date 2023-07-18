@@ -8,9 +8,11 @@ import * as Nominatim from "nominatim-client";
 
 import { stripe } from "@/stripe";
 import { Gericht } from "@/components/restaurant/cartContext";
+import { z } from "zod";
 
 type Restaurant = Database["public"]["Tables"]["restaurants"]["Row"];
 
+// Adapted from https://wrfranklin.org/Research/Short_Notes/pnpoly.html & @freenow/react-polygon-editor 
 const isCoordinateInPolygon = (coordinate: Coordinate, polygon: Coordinate[]): boolean => {
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -78,6 +80,73 @@ const handler: NextApiHandler = async function (req, res) {
     });
   }
 
+  try {
+    /**
+    // this is how a cart looks like. The schema further below checks for the generic structure
+    const example = [
+      {
+        "id": "6a88261c-4fff-4275-91d4-1b0cc108c6bb",
+        "name": "Cheeseburger",
+        "variante": "standard",
+        "preis": 7.5,
+        "extras": {
+          "Ihre Burgersoße": "Ketchup"
+        }
+      },
+      {
+        "id": 3,
+        "name": "Gemischter Salat",
+        "variante": "standard",
+        "preis": 7.5,
+        "extras": {
+          "Ihr Dressing": "French Dressing"
+        }
+      },
+      {
+        "id": "a237e9fe-2f2d-4ede-8fa7-39dd58aabfbd",
+        "name": "Eisbergsalat",
+        "variante": "standard",
+        "preis": 7.5,
+        "extras": {}
+      },
+      {
+        "id": "lol",
+        "name": "Pizza Prosciutto ",
+        "variante": "groß (30cm)",
+        "preis": 11,
+        "extras": {
+          "Ihre Pizzasoße": "Hollondaise",
+          "Ihre Pizzaaextras": [
+            1,
+            3
+          ]
+        }
+      }
+    ]
+    */
+
+    const schema = z.array(z.object({
+      id: z.number().or(z.string()),
+      name: z.string(),
+      variante: z.string(),
+      preis: z.number(),
+      extras:
+        z.union(
+          [z.record(
+            z.string(),
+            z.union([z.string(), z.array(z.number())])
+          ),
+          z.string()])
+          .optional()
+    }))
+
+    schema.parse(cart)
+  } catch (error) {
+    console.error(error)
+    return res.status(400).json({
+      error: 'Mit dem Warenkorb ist etwas falsch. Bitte kontaktieren Sie den Support.'
+    });
+  }
   // at this point we can trust the cart
 
   // check if address is in delivery area
@@ -89,7 +158,9 @@ const handler: NextApiHandler = async function (req, res) {
 
   if (result.length === 0) {
     console.error("No results found")
-    return
+    return res.status(400).json({
+      error: 'Adresse nicht gefunden'
+    });
   }
 
   const point = {
@@ -98,6 +169,10 @@ const handler: NextApiHandler = async function (req, res) {
   }
 
   const isInside = isCoordinateInPolygon(point, polygon)
+
+  /**
+   * Write an Postgresql RLS policy to only allow selects where auth.uid equals the owner_id of the restaurant 
+   */
 
   if (!isInside) {
     return res.status(400).json({
@@ -141,7 +216,7 @@ const handler: NextApiHandler = async function (req, res) {
     mode: 'payment',
     success_url: `http://${host}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     customer_email: address.email,
-    submit_type: 'pay',    
+    submit_type: 'pay',
   });
 
 

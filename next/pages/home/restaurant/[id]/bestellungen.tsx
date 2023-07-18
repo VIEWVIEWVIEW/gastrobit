@@ -4,7 +4,7 @@ import { createBrowserSupabaseClient, createServerSupabaseClient } from '@supaba
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 
 
@@ -64,24 +64,29 @@ function Page(props: Props) {
         .select()
         .eq('restaurand_id', id)
         .order('created_at', { ascending: false })
-  
+
       if (error) return console.log(error)
       if (!orders) return console.log('no orders')
-  
+
       setOrders(orders)
     },
     [supabase, id],
   )
-  
+
   // do realtime updates for orders
   useEffect(() => {
-    const subscription = supabase.channel(`restaurants:id=eq.${id}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'orders',
-    }, payload => {
-      console.log(payload)
-    })
+    const subscription = supabase.channel(`orders:id=eq.${id}`)
+      .on<Order>('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'orders',
+      }, payload => {
+        console.log('payload', payload)
+
+
+        setOrders(orders => [payload.new, ...orders])
+
+      })
       .subscribe((status) => console.log(status))
 
 
@@ -111,16 +116,16 @@ function Page(props: Props) {
                       <th
                         scope='col'
                         className='py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6'>
-                        Name
+                        Bestelldatum
                       </th>
                       <th
                         scope='col'
                         className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>
-                        Bestellungen
+                        Adresse
                       </th>
                       <th
                         scope='col'
-                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'> xD</th>
+                        className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'>Lieferstatus</th>
                       <th
                         scope='col'
                         className='px-3 py-3.5 text-left text-sm font-semibold text-gray-900'></th>
@@ -135,41 +140,7 @@ function Page(props: Props) {
                     </tr>
                   </thead>
                   <tbody className='divide-y divide-sepia-200 bg-sepia-50'>
-                    {orders.map(order => (
-                      <tr key={order.id}>
-                        <td className='py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6'>
-                          {restaurant.name} {order.id}
-                        </td>
-                        <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                          <a
-                            href={`/restaurant/${restaurant.id}/bestellungen`}
-                            className='py-3 hover:text-gray-400 hover:underline'>
-                            {Math.round(Math.random() * 100) % 10} Bestellungen
-                            offen
-                          </a>
-                        </td>
-                        <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                          <a href={`/api/stripe/get-login-link?restaurantId=${restaurant.id}`}>Umsätze</a>
-                        </td>
-                        <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                          <a
-                            href={`/restaurant/${restaurant.id}/settings`}
-                            className='py-3 hover:text-gray-400 hover:underline'>
-                            Restauranteinstellungen
-                          </a>
-                        </td>
-                        <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                          <a
-                            href={`/restaurant/${restaurant.id}/menu`}
-                            className='py-3 hover:text-gray-400 hover:underline'>
-                            Karte editieren
-                          </a>
-                        </td>
-                        <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
-                          b
-                        </td>
-                      </tr>
-                    ))}
+                    {orders.length ? orders.map(order => <Order order={order} key={order.id} />) : <tr><td colSpan={6} className='text-center'>Keine Bestellungen bisher erhalten :(</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -180,6 +151,52 @@ function Page(props: Props) {
       </main>
     </MainLayout>
   )
+}
+
+const Order = ({ order }: { order: Order }) => {
+  const supabase = useSupabaseClient()
+
+  const [orderStatus, setOrderStatus] = useState(order.order_status)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const updateOrderStatus = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setIsSubmitting(true)
+    setOrderStatus(e.target.value)
+    await supabase.from('orders').update({ order_status: e.target.value }).eq('id', order.id)
+    setIsSubmitting(false)
+  }
+
+  return <>
+    <tr>
+      <td className='py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6'>
+        {new Date(order.created_at).toLocaleString()}
+      </td>
+      <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
+        {order.address}
+      </td>
+      <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
+        {order.email}
+      </td>
+      <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
+        <select className='gastrobit-input' value={orderStatus} onChange={updateOrderStatus}>
+          <option value={'pending'}>Offen</option>
+          <option value={'working'}>In Bearbeitung</option>
+          <option value={'rejected'}>Abgelehnt</option>
+          <option value={'completed'}>Ausgeliefert</option>
+        </select>
+      </td>
+      <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
+        <a
+          href={`/restaurant/${1}/menu`}
+          className='py-3 hover:text-gray-400 hover:underline'>
+          Karte editieren
+        </a>
+      </td>
+      <td className='px-3 py-4 text-sm text-gray-500 whitespace-nowrap'>
+
+      </td>
+    </tr>
+  </>
 }
 
 export default Page

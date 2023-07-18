@@ -22,7 +22,6 @@ type PageProps = {
   restaurant: Restaurant
 }
 
-import { isCoordinateInPolygon } from '@freenow/react-polygon-editor/src/helpers';
 import { Coordinate } from "@freenow/react-polygon-editor/src/types";
 import { BeatLoader } from "react-spinners";
 import toast from "react-hot-toast";
