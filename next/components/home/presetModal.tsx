@@ -47,12 +47,14 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
     }
 
     // check for duplicate names
+
     for (const preset of presets) {
       if (preset.name === name && presets.indexOf(preset) !== index) {
         toast.error('Es gibt bereits ein Preset mit diesem Namen')
         return
       }
     }
+
 
     const newPreset: Extras[number] = {
       name,
@@ -66,7 +68,7 @@ function PresetModal({ show: open, setShow: setOpen, presets, setPresets, preset
       const newPresets = [...presets]
       newPresets[index] = newPreset
       setPresets(newPresets)
-      
+
 
     } else {
       setPresets([...presets, newPreset])

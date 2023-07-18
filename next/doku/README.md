@@ -19,6 +19,7 @@ Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombin
 - Niedrige Kommissionen für Gastronomen
 
 ## Identifikation der Anwendungsfälle des Softwareprodukts
+
 ![Use Case Diagramm für Gastronomen und Endnutzer](usecasediagram.png)
 
 ## 2. Identifikation der Anwendungsfälle des Softwareprodukts
@@ -296,38 +297,275 @@ Wenn Sie statt vercel.com direkt auf AWS hosten wollen, ist das ebenso über die
 1. Erstellen Sie ein neues Projekt auf [Supabase.com](https://app.supabase.io/)
 2. Wählen Sie eine Region aus, die zu ihren Endnutzern physisch nah ist und aus Datenschutzsicht sinnvoll ist, z.B. Frankfurt in Deutschland.
 3. Navigieren Sie zu den [Projekteinstellungen](https://supabase.com/dashboard/project/<project-id>/settings/api) und kopieren Sie folgende Daten in Ihre .env-Datei:
-   1. Die Projekt-URL als ``NEXT_PUBLIC_SUPABASE_URL``
-   2. Anon-Key als ``NEXT_PUBLIC_SUPABASE_ANON_KEY``
-   3. Service-Role/Secret-Key als ``SUPABASE_SERVICE_KEY``
-   4. Falls Sie unser Produkt selbst weiterentwickeln möchten, können Sie in Supabase ein eigenes Access-Token definieren. Dies erlaubt es Typen aus der Datenbank zu exportieren. Wir liefern dafür das script ``npm run types`` mit, welches automatisch die neusten Typedefinitionen aus der Datenbank kopiert. Dies macht die Entwicklung sehr viel leichter. Das Access-Token muss als ``SUPABASE_ACCESS_TOKEN`` in der .env-Datei definiert werden.
+   1. Die Projekt-URL als `NEXT_PUBLIC_SUPABASE_URL`
+   2. Anon-Key als `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   3. Service-Role/Secret-Key als `SUPABASE_SERVICE_KEY`
+   4. Falls Sie unser Produkt selbst weiterentwickeln möchten, können Sie in Supabase ein eigenes Access-Token definieren. Dies erlaubt es Typen aus der Datenbank zu exportieren. Wir liefern dafür das script `npm run types` mit, welches automatisch die neusten Typedefinitionen aus der Datenbank kopiert. Dies macht die Entwicklung sehr viel leichter. Das Access-Token muss als `SUPABASE_ACCESS_TOKEN` in der .env-Datei definiert werden.
 4. Für das Erstellen des Datenbankschemas gibt es zwei Möglichkeiten:
-   1. Verwenden Sie das Tool ``pg_restore -h db.<project-id>.supabase.co -U postgres -W -d <database-name> -1 -v "POSTGRES_BACKUP"``, um die Tabellen zu erstellen. (Empfohlen, und wesentlich weniger Arbeit). Die Datei ``POSTGRES_BACKUP`` finden Sie im Ordner über dem Projekt.
+   1. Verwenden Sie das Tool `pg_restore -h db.<project-id>.supabase.co -U postgres -W -d <database-name> -1 -v "POSTGRES_BACKUP"`, um die Tabellen zu erstellen. (Empfohlen, und wesentlich weniger Arbeit). Die Datei `POSTGRES_BACKUP` finden Sie im Ordner über dem Projekt.
    2. Erstellen Sie eine neue Datenbank, und führen das Tabellenscript von Hand aus
-      1. Installieren Sie die postgresql-SQL-Shell, z.B. mit ``sudo apt install postgresql-client``, oder nutzen Sie ein Cross-Platform-Tool für die GUI wie z.B. [pgAdmin](https://www.pgadmin.org/).
-      2. Kopieren Sie den Benutzernamen und das Passwort des Supabase-Admins, und loggen Sie sich mit ``psql -h db.<project-id>.supabase.co -U postgres -W`` ein. *Achten Sie hier auf die Domainendung ``.co`` und nicht ``.com``.*
-      3. Führen Sie die SQL-Statements aus ``pg_dump.sql`` aus, um die Tabellen zu erstellen.
+      1. Installieren Sie die postgresql-SQL-Shell, z.B. mit `sudo apt install postgresql-client`, oder nutzen Sie ein Cross-Platform-Tool für die GUI wie z.B. [pgAdmin](https://www.pgadmin.org/).
+      2. Kopieren Sie den Benutzernamen und das Passwort des Supabase-Admins, und loggen Sie sich mit `psql -h db.<project-id>.supabase.co -U postgres -W` ein. _Achten Sie hier auf die Domainendung `.co` und nicht `.com`._
+      3. Führen Sie die SQL-Statements aus `pg_dump.sql` aus, um die Tabellen zu erstellen.
+5. Richten Sie den S3-Storage auf https://supabase.com/dashboard/project/cdnbppscedvrlglygkyn/storage/buckets ein. Erstellen Sie hierfür einen neuen Bucket, nennen Sie ihn "restaurant_assets" und richten Sie die folgenden Policies ein:
+   1. Name: `Allow everyone to download and list assets`
+      - `SELECT` `default`: USING `(bucket_id = 'restaurant_assets'::text)`
+   2. Name: `Only allow authed users to update their own assets`
+      - `UPDATE` `authenticated`: USING `((bucket_id = 'restaurant_assets'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))`
+   3. Name: `Only allow authed users to insert`
+      - `INSERT` `authenticated`: USING `((bucket_id = 'restaurant_assets'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))`
+   4. Name: `Only allow authed users to delete their own assets`
+      - `DELETE` `authenticated`: USING `((bucket_id = 'restaurant_assets'::text) AND ((auth.uid())::text = (storage.foldername(name))[1]))`
+6. Setzen die den Bucket als "Public", und stellen Sie ein Uploadlimit ein, welches für die Headerbilder von Kategorien auf der Speisekarte sinnvoll ist. Wir empfehlen 8MB.
+7. Erlauben Sie nur Bilderuploads durch das setzen der folgenden MIME-Typen: `image/jpg, image/jpeg, image/png, image/webp`.
 
 #### Stripe.com
 
 1. Erstellen Sie ein neues Projekt auf [Stripe.com](https://stripe.com/)
 2. Verifizieren Sie ihr Konto, indem Sie die notwendigen Dokumente hochladen, oder verwenden Sie den Testmodus ohne Verifizierung (dies ist für den Produktivbetrieb nicht empfohlen, jedoch sinnvoll in einer Testumgebung).
 3. Melden Sie dich für [Stripe-Connect](https://dashboard.stripe.com/connect/accounts/overview) an.
-4. Navigieren Sie zu den [Entwickler-Einstellungen](https://dashboard.stripe.com/apikeys) und kopieren Sie den "Geheimschlüssel als " als ``STRIPE_SECRET_KEY`` in die .env-Datei
-5. Navigieren Sie zu den [Webhooks](https://dashboard.stripe.com/webhooks) und erstellen Sie einen neuen Webhook mit der URL ``https://<domain>/api/stripe/webhook``. Wählen Sie als "Event-Typen" alles mit dem Präfix "checkout.session.*" aus. Kopieren Sie den "Signing Secret" als ``STRIPE_WEBHOOK_SECRET`` in die .env-Datei.
-6. Legen Sie die URL fest, zu welcher navigiert werden soll, wenn ein Gastronom fertig mit der Erstellung seines Stripe-Subkontos ist. Tragen Sie diese als ``STRIPE_RETURN_URL`` und ``STRIPE_REFRESH_URL`` in die .env-Datei ein.
+4. Navigieren Sie zu den [Entwickler-Einstellungen](https://dashboard.stripe.com/apikeys) und kopieren Sie den "Geheimschlüssel als " als `STRIPE_SECRET_KEY` in die .env-Datei
+5. Navigieren Sie zu den [Webhooks](https://dashboard.stripe.com/webhooks) und erstellen Sie einen neuen Webhook mit der URL `https://<domain>/api/stripe/webhook`. Wählen Sie als "Event-Typen" alles mit dem Präfix "checkout.session.\*" aus. Kopieren Sie den "Signing Secret" als `STRIPE_WEBHOOK_SECRET` in die .env-Datei.
+6. Legen Sie die URL fest, zu welcher navigiert werden soll, wenn ein Gastronom fertig mit der Erstellung seines Stripe-Subkontos ist. Tragen Sie diese als `STRIPE_RETURN_URL` und `STRIPE_REFRESH_URL` in die .env-Datei ein.
 
 #### Root-URL
 
-Tragen Sie ihre Root-URL als ``NEXT_PUBLIC_ROOT_URL`` in die .env-Datei ein. Diese wird für die Generierung von Links verwendet, z.B. für die Bestellbestätigung, oder für die Weiterleitung nach dem Checkout. Tragen Sie außerdem für eine Produktiventwicklung die Umgebungsvariable ``env`` als ``production`` ein, damit weniger geloggt wird.
+Tragen Sie ihre Root-URL als `NEXT_PUBLIC_ROOT_URL` in die .env-Datei ein. Diese wird für die Generierung von Links verwendet, z.B. für die Bestellbestätigung, oder für die Weiterleitung nach dem Checkout. Tragen Sie außerdem für eine Produktiventwicklung die Umgebungsvariable `env` als `production` ein, damit weniger geloggt wird.
 
+#### Node.js
+
+Nachdem wir erfolgreich die Secrets und Drittdienste konfiguriert haben, können wir nun die Anwendung starten. Hierfür benötigen wir Node.js. Installieren Sie Node.js, z.B. mit `sudo apt install nodejs`, installieren Sie die abhänigkeiten mit `npm ci` in dem Verzeichnis, wo die `package.json` liegt, und führen Sie die Anwendung mit `npm run dev` aus. Die Anwendung ist nun unter `http://localhost:3000` erreichbar.
+
+Um einen Build für die Produktion zu erstellen, führen Sie `npm run build` und `npm start` aus.
 
 ## Einführung der Nutzung des Produkts durch den Endnutzer
 
-Die Einführung der Nutzung des Produkts durch den Endnutzer umfasst die Erstellung von Benutzerhandbüchern und Schulungsunterlagen sowie die Durchführung von Schulungen für Gastronomen.
+### Registrierung und Login
 
+**Zu Demonstrationszwecken können Sie sich mit dem Testaccount `test@wertfrei.org` und dem Passwort `test123456` einloggen.**
 
+#### Registrierung
+
+1. Navigieren Sie zu https://www.gastrobit.de/login und klicken Sie auf "Hast du noch kein Konto? Registrieren".
+2. Geben Sie ihre gewünschte Email-Adresse und ein Passwort ein, und klicken Sie auf "Registrieren".
+3. Sie bekommen nun eine E-Mail mit einem verifizierungslink. Klicken Sie auf diesen Link.
+
+#### Login
+
+1. Navigieren Sie zu https://www.gastrobit.de/login und geben Sie ihre E-Mail-Adresse und ihr Passwort ein.
+2. Drücken Sie auf Login.
+
+Falls Sie ihr Passwort vergessen haben, können Sie auf "Passwort vergessen" klicken, und Sie bekommen eine E-Mail mit einem Link zum zurücksetzen des Passworts. Oder Sie loggen sich mit der Hilfe eines magischen Links ein.
+
+![Login-Form](login.png)
+
+### Restaurantübersicht
+
+Nachdem Sie sich eingeloggt haben, werden Sie auf die Restaurantübersicht weitergeleitet. Hier können Sie Restaurants hinzufügen, oder bereits erstellte Restaurants verwalten.
+
+![Restaurantübersicht](Restaurantuebersicht.png)
+
+1. Vermutlich haben Sie noch keines erstellt, also klicken Sie auf den Button "Restaurant hinzufügen".
+2. Geben Sie den Namen des Restaurantes ein und wählen Sie ob Sie ein Unternehmen, ein Individuum oder eine Non-Profit sind, und klicken Sie auf "Restaurant erstellen".
+3. Anschließend werden Sie zu unserem Zahlungsdienstleister weitergeleitet. Bitte folgen Sie den Instruktionen auf dem Bildschirm, und antworten Sie wahrheitsgemäß.
+4. Im Anschluss werden Sie wieder zurück zur Restaurantübersicht weitergeleitet und ihr neues Restaurant wird angezeigt.
+
+```
+Im Testmodus für Entwickler können Sie Testdaten verwenden, um den Prozess zu beschleunigen:
+Mobilnummer: +49 00000000
+2FA Code: 000000
+Vorname: Max
+Nachname: Mustermann
+E-Mail: test@stripe.com
+Geburtsdatum: 01.01.1990
+Privatadresse: Musterstraße 1, 58644 Musterstadt
+
+Branche: Restaurants
+Produktbeschreibung: Pizza-Lieferservice
+
+Währung: Euro
+
+IBAN: DE89370400440532013000
+```
+
+### Restaurantverwaltung
+
+Ihr neues Restaurant ist noch nicht besuchbar. **Um das zu ändern, klicken Sie in der Restaurantübersicht auf "Restauranteinstellungen".**
+
+![Restauranteinstellungen](Restauranteinstellungen.png)
+
+In den Restauranteinstellungen können Sie folgende Dinge einstellen:
+
+- eines von 21 Designs auswählen. (Die Designs sind von daisyui.com und sind unter der MIT-Lizenz veröffentlicht).
+- eine Subdomain festlegen.
+- eigene Domains hinzufügen.
+- das Liefergebiet festlegen.
+
+#### Theme
+
+Das Theme auswählen ist sehr einfach. Klicken Sie auf ein Theme im Dropdown und klicken Sie auf "Speichern". Das Theme wird sofort angewendet. Sie müssen jedoch erst eine Subdomain oder eine eigene Domain festlegen, und eine Speisekarte erstellen, um das Theme in voller pracht zu sehen. Es ist sinnvoll, diese Option später neu zu besuchen, sobald wir die wichtigsten Dinge des Restaurants konfiguriert haben.
+
+#### Subdomain
+
+Hier können Sie eine Subdomain festlegen, unter der ihr Restaurant erreichbar ist. Geben Sie einen Namen ein, und klicken Sie auf "Speichern". Sie können nun ihr Restaurant unter `<subdomain>.gastrobit.de` erreichen. Sie müssen jedoch erst eine Speisekarte erstellen, um das Restaurant zu besuchen.
+
+#### Eigene Domains
+
+Falls Sie eine eigene Domain besitzen, z.B. "marcs-pizzarestaurant-iserlohn.de", können Sie diese hier hinzufügen. Tragen Sie die Domain in das Feld ein und drücken Sie auf "Domain hinzufügen".
+
+Nach wenigen Sekunden bekommen Sie ein neues Element auf Ihrem Bildschirm angezeigt, welches Ihnen sagt, dass Sie einen DNS-Eintrag hinzufügen müssen. Dieser Eintrag ist notwendig, damit wir ihre Domain mit unserem System verbinden können. Sie können hier zwischen "A-Record" und "CName-Record" wählen.
+
+![Eine invalid konfigurierte Domain](invalid-domain.png)
+
+**Falls Sie nicht wissen, welchen Eintrag Sie hinzufügen müssen, kontaktieren Sie bitte ihren Domain-Provider.**
+
+Nachdem Sie den Eintrag hinzugefügt haben wird nach wenigen Sekunden ihre Domain als "Verifiziert" angezeigt. Sie können nun ihr Restaurant unter `<domain>` erreichen. Sie müssen jedoch erst eine Speisekarte erstellen, um das Restaurant zu besuchen.
+
+![Eine Domain im Panel vom Domainanbieter "Cloudflare.com", welche korrekt konfiguriert wurde.](cloudflare.png)
+
+![Eine korrekt konfigurierte Domain.](correct-domain.png)
+
+#### Liefergebiet
+
+Um ein Liefergebiet festzulegen, folgen Sie diesen Instruktionen:
+
+1. Klicken Sie auf den Button "Liefergebiet einsehen und festlegen".
+2. Sie werden aufgefordert Ihren Standort zu teilen. Lesen Sie die Meldung durch, verstehen Sie sie, und klicken Sie ggf. auf "Erlauben".
+   ![Standort teilen? Ja.](standort.png)
+3. Sie werden nun auf eine Karte weitergeleitet, auf der Sie ihr Liefergebiet festlegen können. Benutzen Sie dafür das "Pen"-Werkzeug, um neue Punkte auf der Karte einzutragen. Sie können auch bereits bestehende Punkte per Drag-and-Drop verschieben. Wenn Sie einen Punkt löschen wollen, klicken Sie den Punkt an und anschließend auf "Delete".
+4. Klicken Sie auf "Speichern", wenn Sie fertig sind.
+
+![Polygon für Ost-Iserlohn und Hemer.](liefergebiet.png)
+
+### Speisekarte
+
+Um eine Speisekarte zu erstellen, klicken Sie auf "Karte editieren" in der Restaurantübersicht. Anschließend landen Sie bei der Speisekartenverwaltung, mit ein paar Beispielen, die Sie löschen können.
+
+![Initiale Speisekarte](speisekarte-1.png)
+
+#### Presets für Extras
+
+Ein Extra ist auf Extra-Attribut zu einem Gericht. Dies kann bei einer Pizza beispielsweise "Käse", "Zwiebeln", "Paprika", etc. sein. Sie können hierfür Presets erstellen, um die Arbeit zu erleichtern.
+
+Es gibt zwei Arten von Extras: **Einzelauswahl** und **Mehrfachauswahl**.
+
+Einzelauswahl bedeutet, dass der Kunde nur eine Option auswählen kann, wie z.B. die Soße bei einer Pizza (man wählt zwischen Tomatensoße oder Hollondaise). Wenn eine Auswahl getroffen werden muss, kann es hier sinnvoll sein, den Preis für die Auswahl auf "0"€ zu setzen.
+
+Klicken Sie auf "Extra hinzufügen" um eine neue Zeile hinzuzufügen, oder auf das Kreuz um eine Zeile zu löschen. Drücken Sie auf "Hinzufügen", um das Preset fertigzustellen.
+
+![Einzelauswahl](einzelauswahl-magie.png)
+
+Mehrfachauswahl bedeutet, dass der Kunde mehrere Optionen auswählen kann, z.B. kann der Kunde mehrere Extras wie Käse, Zwiebeln, Paprika etc. auswählen.
+
+Das ganze funktioniert genau wie die Einzelauswahl:
+
+![Mehrfachauswahl](Mehrfachauswahl.png)
+
+**Bitte beachten Sie die Daten zu speichern durch das klicken auf "Speichern" am unteren Ende der Seite.**
+
+![Speichern nicht vergessen.](speichern.png)
+
+#### Kategorien
+
+Sie können eine Kategorie einfach durch das drücken auf "Neue Kategorie hinzufügen" am unteren Ende der Seite anklicken. Sie werden darauf aufgefordert, einen Namen für die Kategorie festzulegen.
+
+![Geben Sie den Namen der neuen Kategorie an.](new_cat.png)
+
+Anschließend können Sie einen neuen Banner per Drag-and-Drop auf den Platzhalter, oder durch Anklicken setzen.
+
+![Neues Banner setzen.](banner.png)
+
+![Nicht die Seite verlassen, während der Ladeindikator bei dem neuen Banner angezeigt wird. In dieser Zeit wird das Bild hochgeladen, was je nach Internetverbindung ein wenig dauern kann.](uploading.png)
+
+Sie können die Kategorie durch Klicken auf den Namen wieder umbenennen, oder durch das Klicken auf das Kreuz löschen.
+
+Die Pfeile erlauben es Ihnen, die Reihenfolge der Kategorien zu ändern.
+
+Das Kreuz neben dem Namen der Kategorie erlaubt es Ihnen, die Kategorie zu löschen.
+
+**Bitte klicken Sie auf "Speichern", um die Änderungen zu speichern.**
+
+#### Gerichte
+
+Fügen Sie ein neues Gericht zu einer Kategorie hinzu, indem Sie auf das Plussymbol klicken.
+
+![Plussymbol anklicken.](plus.png)
+
+Anschließend können Sie das neuhinzugefügte Gericht bearbeiten, indem Sie auf den Strift oben rechts in der Ecke klicken. _Übrigens, mit den zwei Strichen daneben können Sie das Gericht in der Reihenfolge der Kategorie verschieben. Einfach draufklicken, die Maustaste gedrückt halten, und das Gericht an die gewünschte Stelle ziehen. Das Kreuz daneben löscht logischerweise das Gericht._
+
+![Gericht bearbeiten.](edit-gericht.png)
+
+Anschließend kommt das folgende Menü zum Vorschein:
+
+![Editieren des Gerichtes](edit-gericht-2.png)
+
+Sie können die Überschrift und Unterschrift hier bearbeiten.
+
+Hier können Sie Preise für verschiedene Varianten des Gerichtes (z.B. Groß, Mittel, Klein bei Pizzen) festlegen. Wenn es nur eine Variante gibt, ist es ratsam, die Variante einfach "Standard" zu nennen, und die restlichen Varianten zu löschen.
+
+Außerdem können Sie hier die Extra-Attribute aus ihren Presets hinzufügen. Einfach in der Combobox auswählen und auf "Hinzufügen" drücken. Sie können die Extras auch wieder löschen, indem Sie auf das Kreuz neben dem Namen des Extras klicken.
+
+![Extras](extra-presets.png)
+
+Wenn Sie fertig sind, klicken Sie auf "Ändern", und anschließend auf "Speichern" am Ende der Seite.
+
+Falls Sie weitere Fragen haben, kontaktieren Sie unseren Support unter richts.marc-alexander@fh-swf.de.
 
 Quellen und verwendete Libraries:
 
-- [https://github.com/freenowtech/react-polygon-editor](@freenow/react-polygon-editor) - Polygon-Editor zum editieren des Liefergebiets
-- [https://github.com/clauderic/dnd-kit](@dnd-kit/core) - Drag and Drop Library für React
+```
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/modifiers": "^6.0.1",
+    "@dnd-kit/sortable": "^7.0.2",
+    "@freenow/react-polygon-editor": "^2.0.1",
+    "@headlessui/react": "^1.7.13",
+    "@heroicons/react": "^2.0.17",
+    "@prisma/client": "^4.12.0",
+    "@supabase/auth-helpers-nextjs": "^0.6.1",
+    "@supabase/auth-helpers-react": "^0.3.1",
+    "@supabase/auth-ui-react": "^0.3.5",
+    "@supabase/auth-ui-shared": "^0.1.3",
+    "@supabase/supabase-js": "^2.15.0",
+    "@types/node": "18.15.11",
+    "@types/react": "18.0.31",
+    "@types/react-dom": "18.0.11",
+    "daisyui": "^3.1.0",
+    "eslint": "8.37.0",
+    "leaflet": "^1.9.4",
+    "lodash-es": "^4.17.21",
+    "micro-cors": "^0.1.1",
+    "next": "^13.4.1",
+    "node-uuid": "^1.4.8",
+    "nominatim-browser": "^2.1.0",
+    "nominatim-client": "^3.2.1",
+    "querystring": "^0.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-geolocated": "^4.1.1",
+    "react-hook-form": "^7.43.9",
+    "react-hot-toast": "^2.4.1",
+    "react-leaflet": "^4.2.1",
+    "react-spinners": "^0.13.8",
+    "redux": "^4.2.1",
+    "stripe": "^11.18.0",
+    "styled-components": "^6.0.4",
+    "swr": "^2.1.5",
+    "typescript": "5.0.3",
+    "zod": "^3.21.4",
+    "zustand": "^4.3.8"
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.3",
+    "@types/leaflet": "^1.9.3",
+    "@types/lodash-es": "^4.17.8",
+    "@types/lodash.isequal": "^4.5.6",
+    "@types/micro-cors": "^0.1.3",
+    "autoprefixer": "^10.4.14",
+    "eslint-config-next": "^13.4.1",
+    "postcss": "^8.4.21",
+    "supabase": "^1.50.2",
+    "tailwindcss": "^3.3.1"
+```
+
+Bilder für die Präsentation wurden von [Unsplash](https://unsplash.com/) bezogen. Es gilt die Lizenz dass die Bilder nichtkommerziell frei verwendet werden dürfen. Mehr Informationen dazu unter [https://unsplash.com/license](https://unsplash.com/license).
+

@@ -525,7 +525,9 @@ const Menu = (props: Props) => {
     props.restaurant.karte ?? testkarte,
   )
 
-  const [presets, setPresets] = useState<Extras>(props.restaurant.extra_presets as Extras)
+  const [presets, setPresets] = useState<Extras>(props.restaurant.extra_presets as Extras ?? [])
+
+
 
   // @TODO just debug function, delete me later
   const addPizza = () => {
@@ -680,7 +682,7 @@ const RestaurantExtraPreset = ({ preset, index, setPresets, presets, categories,
   const [openEditModal, setOpenEditModal] = useState(false)
 
   const deleteCurrentPreset = () => {
-    alert(JSON.stringify(categories))
+    // alert(JSON.stringify(categories))
     // check if the preset is used in any gericht in the menu. If so, we throw a prompt t oask for confirmation
     for (const category of categories) {
       for (const gericht of category.gerichte) {
@@ -767,6 +769,11 @@ export const getServerSideProps: GetServerSideProps = async function (ctx) {
     .limit(1)
     .eq('id', ctx.params!.id)
     .single()
+
+
+    if (!Array.isArray(restaurant.extra_presets)) {
+      restaurant.extra_presets = []
+    }
 
   console.debug(restaurant)
 
