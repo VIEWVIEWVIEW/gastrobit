@@ -425,7 +425,9 @@ Um ein Liefergebiet festzulegen, folgen Sie diesen Instruktionen:
 
 1. Klicken Sie auf den Button "Liefergebiet einsehen und festlegen".
 2. Sie werden aufgefordert Ihren Standort zu teilen. Lesen Sie die Meldung durch, verstehen Sie sie, und klicken Sie ggf. auf "Erlauben".
-   ![Standort teilen? Ja.](standort.png)
+
+![Standort teilen? Ja.](standort.png)
+
 3. Sie werden nun auf eine Karte weitergeleitet, auf der Sie ihr Liefergebiet festlegen können. Benutzen Sie dafür das "Pen"-Werkzeug, um neue Punkte auf der Karte einzutragen. Sie können auch bereits bestehende Punkte per Drag-and-Drop verschieben. Wenn Sie einen Punkt löschen wollen, klicken Sie den Punkt an und anschließend auf "Delete".
 4. Klicken Sie auf "Speichern", wenn Sie fertig sind.
 
@@ -574,7 +576,7 @@ Die ersten drei Status dienen nur der Verwaltung und Übersicht für Sie. Abgele
 
 Falls Sie weitere Fragen haben, kontaktieren Sie unseren Support unter richts.marc-alexander@fh-swf.de.
 
-Quellen und verwendete Libraries:
+Quellen und verwendete Libraries, sofern nicht anders markiert:
 ```
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/modifiers": "^6.0.1",
