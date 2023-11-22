@@ -17,5 +17,5 @@ Gastrobit is an alternative to Lieferando.de (the german offshoot of Takeaway.co
 * Checkout via Stripe.
 
 <p align="center">
-  <img src="./next/doku/example-menu.PNG" alt="" width="738">
+  <img src="./next/doku/example-menu.PNG" alt="" width="800">
 </p>
