@@ -10,7 +10,7 @@
 
 Die Anforderungen für unsere Alternative zu Lieferando wurden durch eine Kombination aus Marktforschung und einem Gastronomeninterview ermittelt. Die Hauptanforderungen sind:
 
-- Benutzerfreundliche Oberfläche für den ENdkunden
+- Benutzerfreundliche Oberfläche für den Endkunden
 - Responsive Design für mobile Endgeräte beim Kaufvorgang durch Endkunden
 - Einfache Bestellprozesse für den Endkunden
 - Bezahlungsfunktion für den Endkunden
