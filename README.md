@@ -29,13 +29,15 @@ Gastrobit is an alternative to Lieferando.de (the german offshoot of Takeaway.co
 
 
 ## Demo
+
+If you just want to take a look at the restaurant page, you can check out **[marcpizzaland.gastrobit.de](https://marcpizzaland.gastrobit.de/)** (also reachable via a custom domain: [helloworld.wertfrei.org](helloworld.wertfrei.org)).
+
+
 A demo of the application is available at [gastrobit.de](https://gastrobit.de). You can log in as a restaurant owner with the following credentials:
 ```
 test@wertfrei.org
 test123456
 ```
-
-If you just want to take a look at the restaurant page, you can check out **[marcpizzaland.gastrobit.de](https://marcpizzaland.gastrobit.de/)** (also reachable via a custom domain: [helloworld.wertfrei.org](helloworld.wertfrei.org)).
 
 
 ## Features
